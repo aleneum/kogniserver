@@ -7,3 +7,5 @@ dist/
 *.pyc
 .coverage
 .tox
+
+node.key

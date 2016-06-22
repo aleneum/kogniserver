@@ -34,7 +34,7 @@ class Component(ApplicationSession):
         # setup ping
         sub = yield self.subscribe(self.on_ping, "com.wamp.ping")
 
-        print 'RSB-WAMP-bridge started...'
+        print 'kogniserver(asyncio) started...'
 
         try:
             while True:
@@ -42,7 +42,7 @@ class Component(ApplicationSession):
                 self.publish("com.wamp.ping", "ping")
                 yield asyncio.sleep(1)
         except Exception:
-            print("shutting down RSB-WAMP-bridge...")
+            print("shutting kogniserver...")
             for scope in self.scopes.values():
                 scope.release()
 

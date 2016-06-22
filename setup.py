@@ -55,7 +55,7 @@ setup(
     install_requires=['txaio', 'pyasn1', 'autobahn<0.13.0', 'crossbar<0.13.0', 'trollius', 'rsb-python<0.13.0'],
     entry_points={
         "console_scripts": [
-            "kogniserver = kogniserver.asyncio:main_entry",
+            "kogniserver = kogniserver.async:main_entry",
         ]
     },
     cmdclass={
