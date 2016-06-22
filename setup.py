@@ -44,13 +44,14 @@ setup(
     version='0.1.0',
     maintainer='Alexander Neumann',
     maintainer_email='aleneum@gmail.com',
+    url='http://github.com/aleneum/kogniserver',
     description="Interface server of the KogniHome project",
     platforms=['Any'],
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
-    tests_requires=['nose>=1.3', 'coverage'],
+    tests_require=['nose>=1.3', 'coverage'],
     install_requires=['txaio', 'pyasn1', 'autobahn<0.13.0', 'crossbar<0.13.0', 'trollius', 'rsb-python<0.13.0'],
     entry_points={
         "console_scripts": [
