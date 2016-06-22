@@ -40,7 +40,7 @@
                   },
                   "/": {
                      "type": "static",
-                     "directory": "var/www/bridge"
+                     "directory": "var/www/kognihome"
                   },
                   "proto": {
                     "type": "static",
