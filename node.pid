@@ -1,0 +1,20 @@
+{
+   "pid": 42309, 
+   "options": {
+      "cbdir": "/Users/alneuman/kognihome/kogniserver", 
+      "cdc": false, 
+      "loglevel": "info", 
+      "logtofile": false, 
+      "logformat": "standard", 
+      "command": "start", 
+      "logdir": null, 
+      "config": "/Users/alneuman/kognihome/env/etc/crossbar/config.json", 
+      "colour": "ifavailable", 
+      "reactor": null
+   }, 
+   "argv": [
+      "/Users/alneuman/kognihome/env/bin/crossbar", 
+      "start", 
+      "--config=/Users/alneuman/kognihome/env/etc/crossbar/config.json"
+   ]
+}

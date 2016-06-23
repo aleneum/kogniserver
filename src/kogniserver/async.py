@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 try:
     import asyncio
@@ -7,7 +8,6 @@ except ImportError:
     # Trollius >= 0.3 was renamed
     import trollius as asyncio
 
-from os import environ
 from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
 from services import SessionHandler
 
@@ -40,16 +40,19 @@ class Component(ApplicationSession):
             while True:
                 logging.debug("ping")
                 self.publish("com.wamp.ping", "ping")
-                yield asyncio.sleep(1)
-        except Exception:
-            print("shutting kogniserver...")
-            for scope in self.scopes.values():
-                scope.release()
+                asyncio.sleep(1)
+        except Exception as e:
+            print e
+            raise e
+
 
 def main_entry():
     from autobahn.asyncio.wamp import ApplicationRunner
-    runner = ApplicationRunner(url = u"ws://127.0.0.1:8181/ws", realm = u"realm1")
-    runner.run(Component)
+    runner = ApplicationRunner(url=u"ws://127.0.0.1:8181/ws", realm=u"realm1")
+    try:
+        runner.run(Component)
+    except KeyboardInterrupt or Exception:
+        print "shutting down kogniserver..."
 
 if __name__ == '__main__':
     main_entry()
