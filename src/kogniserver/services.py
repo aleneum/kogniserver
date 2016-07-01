@@ -31,6 +31,7 @@ class Bridge(object):
         else:
             self.wamp_callback = self.send_rst
             self.rsb_callback = self.on_bytearray_message
+            self.rsb_type = str('.' + message_type)
         self.rsb_listener = rsb.createListener(self.rsb_scope)
         self.rsb_listener.addHandler(self.rsb_callback)
         self.rsb_publisher = rsb.createInformer(self.rsb_scope)
@@ -46,27 +47,28 @@ class Bridge(object):
             msg = '\0' + base64.b64encode(event.data).decode('ascii')
             self.wamp.publish(self.wamp_scope, msg)
         except Exception as e:
-            print e
+            logging.error(e)
             sys.exit(1)
 
     def on_primitive_message(self, event):
         if 'wamp' in event.metaData.userInfos:
             logging.debug("received OWN rsb primitive on %s, skipping..." % self.rsb_scope)
             return
-        logging.debug("received rsb primtive [%s] on %s" % (str(event.data), self.rsb_scope))
+        logging.debug("received rsb primtive [%s] on %s" % (str(event.data[1]), self.rsb_scope))
         logging.debug("sent to %s" % self.wamp_scope)
-        self.wamp.publish(self.wamp_scope, self.rsb_type(event.data))
+        self.wamp.publish(self.wamp_scope, self.rsb_type(event.data[1]))
 
     def send_rst(self, event):
         try:
             logging.info("send rst message to %s" % self.rsb_scope)
             binary_data = bytearray(base64.b64decode(event[1:]))
             ev = Event(scope=self.rsb_publisher.getScope(),
-                       data=binary_data,
-                       type=tuple)
-            self.rsb_publisher.publishData(binary_data, userInfos={'wamp':''})
+                       data=(self.rsb_type, binary_data),
+                       type=tuple,
+                       userInfos={'wamp': ''})
+            self.rsb_publisher.publishEvent(ev)
         except Exception as e:
-            print e
+            logging.error(e)
             sys.exit(1)
 
     def send_primitive_data(self, event):
@@ -75,26 +77,25 @@ class Bridge(object):
             self.rsb_publisher.publishData(self.rsb_type(event),
                                            userInfos={'wamp':''})
         except Exception as e:
-            print e
+            logging.error(e)
             sys.exit(1)
 
     def on_wamp_message(self, event):
-        logging.debug('received wamp message on %s' % self.wamp_scope)
+        logging.debug('Received wamp message on %s' % self.wamp_scope)
         self.wamp_callback(event)
 
     def shutdown(self):
-        logging.info("shutting down bridge")
+        logging.info("Shutting down bridge...")
         self.rsb_listener.deactivate()
-        #del self.rsb_listener
         if self.rsb_publisher is not False:
             self.rsb_publisher.deactivate()
-            #del self.rsb_publisher
 
 
 class SessionHandler(object):
 
     def __init__(self, wamp_session, log_level=logging.WARNING):
-        logging.basicConfig(level=log_level)
+        logging.basicConfig()
+        logging.getLogger().setLevel(log_level)
         logging.getLogger("rsb").setLevel(logging.ERROR)
 
         self.wamp_session = wamp_session
@@ -121,14 +122,13 @@ class SessionHandler(object):
         logging.info("trying to register on scope %s with message type %s" %
                      (rsb_scope, message_type))
 
-        # supress rsb logging warnings
         if rsb_scope not in self.scopes:
             b = Bridge(rsb_scope, self.wamp_session, message_type)
             self.scopes[rsb_scope] = b
             return "Scope registered"
         return "Scope already exists"
 
-    def __del__(self):
-        logging.info("deleting session")
+    def quit(self):
+        logging.info("quitting session...")
         for bridge in self.scopes.values():
             bridge.shutdown()

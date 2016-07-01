@@ -1,6 +1,6 @@
 import logging
 import os
-import sys
+import signal
 
 try:
     import asyncio
@@ -25,25 +25,32 @@ class Component(ApplicationSession):
             log_level = logging.DEBUG
         else:
             log_level = logging.WARN
-        logging.basicConfig(level=log_level)
-        session = SessionHandler(self, log_level)
+        logging.basicConfig()
+        logging.getLogger().setLevel(log_level)
+        self.session = SessionHandler(self, log_level)
 
         # register RPC
-        reg = yield self.register(session.register_scope, 'service.displayserver.register')
+        reg = yield self.register(self.session.register_scope, 'service.displayserver.register')
 
         # setup ping
         sub = yield self.subscribe(self.on_ping, "com.wamp.ping")
 
         print 'kogniserver(asyncio) started...'
 
-        try:
-            while True:
-                logging.debug("ping")
-                self.publish("com.wamp.ping", "ping")
-                asyncio.sleep(1)
-        except Exception as e:
-            print e
-            raise e
+        # self.running = True
+
+        # try:
+        #     while self.running:
+        #         logging.debug("ping")
+        #         self.publish("com.wamp.ping", "ping")
+        #         yield asyncio.sleep(1)
+        # except Exception as e:
+        #     logging.debug(e)
+        #     raise e
+
+    def onLeave(self, details):
+        self.session.quit()
+        print("kogniserver session left...")
 
 
 def main_entry():
@@ -52,7 +59,8 @@ def main_entry():
     try:
         runner.run(Component)
     except KeyboardInterrupt or Exception:
-        print "shutting down kogniserver..."
+        raise KeyboardInterrupt
+    print "shutting down kogniserver..."
 
 if __name__ == '__main__':
     main_entry()

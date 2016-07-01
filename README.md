@@ -20,7 +20,7 @@ $ python setup.py install (--prefix=/install/path/prefx)
 $ # python setup.py install --prefix=/usr/local
 ```
 
-`/install/path` should be the *root* of your preferred environment and will be concatenated with 'lib/python2.7/site-packages'. Make sure that `/install/path/lib/python2.7/site-packages` is in your `PYTHONPATH`.
+`/install/path` should be the *root* of your preferred environment and will be concatenated with *'lib/python2.7/site-packages'*. Make sure that `/install/path/lib/python2.7/site-packages` is in your `PYTHONPATH`.
 
 
 ### Configuration
@@ -33,7 +33,8 @@ $ # kogniserver-adm configure --protopath=/usr/local/share/rst0.12/proto
 ```
 
 This will create a common config.json at `/install/path/etc/crossbar.json.
-`-p, --protopath=` is an optional argument if protocol buffer files are already installed somewhere and should be linked under '/server_root/proto' into the server environment.
+`-p, --protopath=` is an optional argument and can be used if protocol buffer files are already installed.
+ If provided, the proto path will be linked under '/server_root/proto' into the server environment.
 
 
 ### Starting
@@ -44,13 +45,13 @@ The easiest way to start crossbar and kogniserver is again with the kogniserver-
 $ kogniserver-adm start
 ```
 
-Alternatively you can start crossbar and kogniserver individually. First start a crossbar instance
+Alternatively you can start crossbar and kogniserver individually. First start a crossbar instance:
 
 ```bash
 $ crossbar start --config=/path/to/config.json
 ```
 
-After that you can initialize kogniserver
+After that you can initialize kogniserver:
 
 ```
 $ kogniserver
@@ -62,4 +63,4 @@ If you use the standard configuration, files will be hosted under `$prefix/var/w
 
 ### What now?
 
-If you plan to write event driven applications in javascript you want to have a look at the [KogniJS-Framework](http://github.com/aleneum/kognijs-rsb).
+If you plan to write applications in javascript, head over to [KogniJS-Framework](http://github.com/aleneum/kognijs-rsb).

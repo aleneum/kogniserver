@@ -9,3 +9,11 @@ dist/
 .tox
 
 node.key
+
+*.priv
+
+*.pub
+
+*.pid
+
+*.pid

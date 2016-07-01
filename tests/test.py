@@ -1,7 +1,6 @@
 from unittest import TestCase
 from kogniserver.services import SessionHandler, Bridge
 from mock import MagicMock
-import inspect
 
 
 class TestKogniServer(TestCase):
