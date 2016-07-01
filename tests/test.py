@@ -10,7 +10,7 @@ class TestKogniServer(TestCase):
         self.session = SessionHandler(wamp_session=wamp)
 
     def tearDown(self):
-        del self.session
+        self.session.quit()
 
     def test_create(self):
         s = SessionHandler(wamp_session=None)
