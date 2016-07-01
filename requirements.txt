@@ -1,1 +1,7 @@
 six
+txaio
+pyasn1
+autobahn
+crossbar
+trollius
+rsb-python<0.13.0
