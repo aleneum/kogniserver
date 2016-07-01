@@ -1,0 +1,3 @@
+[run]
+source = kogniserver
+include = */kogniserver/*
