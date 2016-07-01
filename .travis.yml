@@ -9,3 +9,7 @@ script:  nosetests --with-coverage
 after_success:
   - coveralls --config_file .coveragerc
 sudo: false
+addons:
+  apt:
+    packages:
+      - protobuf-compiler
