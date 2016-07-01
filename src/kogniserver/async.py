@@ -1,6 +1,7 @@
 import logging
 import os
-import signal
+from threading import Thread
+import time
 
 try:
     import asyncio
@@ -10,6 +11,23 @@ except ImportError:
 
 from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
 from services import SessionHandler
+
+
+class Ping(Thread):
+    def __init__(self, wamp):
+        Thread.__init__(self)
+        self.running = True
+        self.wamp = wamp
+
+    def run(self):
+        try:
+            while self.running:
+                logging.debug("ping")
+                self.wamp.publish("com.wamp.ping", "ping")
+                time.sleep(1)
+        except Exception as e:
+            logging.debug(e)
+            raise e
 
 
 class Component(ApplicationSession):
@@ -35,20 +53,15 @@ class Component(ApplicationSession):
         # setup ping
         sub = yield self.subscribe(self.on_ping, "com.wamp.ping")
 
+        self.ping = Ping(self)
+        self.ping.start()
+
         print 'kogniserver(asyncio) started...'
 
-        # self.running = True
-
-        # try:
-        #     while self.running:
-        #         logging.debug("ping")
-        #         self.publish("com.wamp.ping", "ping")
-        #         yield asyncio.sleep(1)
-        # except Exception as e:
-        #     logging.debug(e)
-        #     raise e
-
     def onLeave(self, details):
+        self.ping.running = False
+        while self.ping.isAlive():
+            time.sleep(0.1)
         self.session.quit()
         print("kogniserver session left...")
 
