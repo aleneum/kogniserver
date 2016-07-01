@@ -6,7 +6,7 @@ import json
 
 setup(
     name='kogniserver',
-    version='0.1.1',
+    version='0.1.2',
     maintainer='Alexander Neumann',
     maintainer_email='aleneum@gmail.com',
     url='http://github.com/aleneum/kogniserver',
