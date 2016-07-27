@@ -1,8 +1,8 @@
 import argparse
 from os.path import abspath, exists, join
-import json
 import re
 import subprocess
+import json
 import threading
 import time
 
@@ -21,20 +21,39 @@ def run_crossbar(config_path, keep_alive):
 
 def main_entry():
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', help='administration action to be executed', choices=['configure', 'start'])
-    parser.add_argument('-p', '--protopath', help='path containing proto files', type=str)
     parser.add_argument('-f', '--force', help='overwrite config file if it already exists', action='store_true')
-    parser.add_argument('-k', '--keep-alive', help='use existing ', action='store_true')
+    parser.add_argument('-k', '--keep-alive', help='use existing crossbar instance', action='store_true')
     args = parser.parse_args()
 
     pwd = abspath(__file__)
-    elems = re.compile('[\\\\/]+').split(pwd)[:-6]
+    elems = re.compile('[\\\\/]+').split(pwd)
+    if 'site-packages' in elems:
+        idx = elems.index('site-packages')
+        elems = elems[:idx-2]
+    else:
+        elems = elems[:-1]
     prefix = join("/", *elems)
     config_path = join(prefix, 'etc/crossbar/config.json')
 
-    if args.command == 'configure':
+    choice = 'n'
+    if exists(config_path) is False:
+        input_valid = False
+        while not input_valid:
+            choice = raw_input("config.json for crossbar does not exists. Should a default one be created? [y]/n:") or 'y'
+            if choice not in ['y','n']:
+                print("please enter 'y' or 'n'.")
+            else:
+                input_valid = True
 
-        protopath = abspath(args.protopath) if args.protopath else False
+    if choice in 'y' or args.force:
+        default_path = join(prefix, 'share/rst0.12/proto')
+        input_valid = False
+        while not input_valid:
+            protopath = raw_input("Location of proto-files? [%s]:" % default_path) or default_path
+            if not exists(protopath):
+                print("%s does not exist!" % protopath)
+            else:
+                input_valid = True
 
         if exists(config_path) and not args.force:
             print "Config file already exists! Use --force to overwrite."
@@ -50,12 +69,11 @@ def main_entry():
                 del paths['proto']
             json.dump(j, target, indent=4)
 
-    elif args.command == 'start':
-        t1 = threading.Thread(target=run_crossbar, args=(config_path,args.keep_alive,))
-        t1.setDaemon(True)
-        t1.start()
-        time.sleep(5)
-        async_main()
+    t1 = threading.Thread(target=run_crossbar, args=(config_path,args.keep_alive,))
+    t1.setDaemon(True)
+    t1.start()
+    time.sleep(5)
+    async_main()
 
 
 if __name__ == '__main__':

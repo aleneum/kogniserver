@@ -7,13 +7,7 @@ dist/
 *.pyc
 .coverage
 .tox
-
 node.key
-
 *.priv
-
 *.pub
-
-*.pid
-
 *.pid

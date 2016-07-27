@@ -10,6 +10,8 @@ from rsb import Event
 from rsb.protocol.introspection.Hello_pb2 import Hello
 from rsb.protocol.introspection.Bye_pb2 import Bye
 
+from rsb.converter import NoneConverter, DoubleConverter, Int64Converter, BoolConverter, StringConverter, BytesConverter
+
 
 class Bridge(object):
     basic_types = {'integer': int, 'float': float, 'string': str, 'bool': bool}
@@ -42,7 +44,7 @@ class Bridge(object):
             return
         logging.debug('received rsb bytearray on %s' % self.rsb_scope)
         logging.debug('event length %d' % len(event.data))
-        logging.debug('sent to %s' %self.wamp_scope)
+        logging.debug('sent to %s' % self.wamp_scope)
         try:
             msg = '\0' + base64.b64encode(event.data).decode('ascii')
             self.wamp.publish(self.wamp_scope, msg)
@@ -54,9 +56,9 @@ class Bridge(object):
         if 'wamp' in event.metaData.userInfos:
             logging.debug("received OWN rsb primitive on %s, skipping..." % self.rsb_scope)
             return
-        logging.debug("received rsb primtive [%s] on %s" % (str(event.data[1]), self.rsb_scope))
+        logging.debug("received rsb primitive [%s] on %s" % (str(event.data), self.rsb_scope))
         logging.debug("sent to %s" % self.wamp_scope)
-        self.wamp.publish(self.wamp_scope, self.rsb_type(event.data[1]))
+        self.wamp.publish(self.wamp_scope, self.rsb_type(event.data))
 
     def send_rst(self, event):
         try:
@@ -73,9 +75,8 @@ class Bridge(object):
 
     def send_primitive_data(self, event):
         try:
-            logging.info("send primitive message [%s] message to %s" % (str(event),self.rsb_scope))
-            self.rsb_publisher.publishData(self.rsb_type(event),
-                                           userInfos={'wamp':''})
+            logging.info("send primitive message [%s] message to %s" % (str(event), self.rsb_scope))
+            self.rsb_publisher.publishData(event)
         except Exception as e:
             logging.error(e)
             sys.exit(1)
@@ -105,12 +106,19 @@ class SessionHandler(object):
         conv = SchemaAndByteArrayConverter()
         conv_list = PredicateConverterList(bytearray)
         conv_list.addConverter(conv,
-                               wireSchemaPredicate=lambda wireSchema: not wireSchema.startswith('rsb.protocol.introspection')
+                               wireSchemaPredicate=lambda wireSchema: wireSchema.startswith('.')
                                )
 
         # register introspection types
         for clazz in [Hello, Bye]:
             converter = rsb.converter.ProtocolBufferConverter(messageClass=clazz)
+            conv_list.addConverter(converter)
+
+        default_converters = [NoneConverter(), DoubleConverter(), Int64Converter(), BoolConverter(),
+                              StringConverter(wireSchema="utf-8-string", dataType=str, encoding="utf_8"),
+                              BytesConverter()]
+
+        for converter in default_converters:
             conv_list.addConverter(converter)
 
         for t in trans:

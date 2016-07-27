@@ -20,8 +20,7 @@ setup(
     install_requires=['txaio', 'pyasn1', 'autobahn', 'crossbar', 'trollius', 'rsb-python<0.13.0'],
     entry_points={
         "console_scripts": [
-            "kogniserver = kogniserver.async:main_entry",
-            "kogniserver-adm = kogniserver.adm:main_entry"
+            "kogniserver = kogniserver.adm:main_entry"
         ]
     },
     license='MIT',
