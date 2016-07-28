@@ -4,19 +4,25 @@ import logging
 import copy
 
 import rsb
-from rsb.converter import PredicateConverterList, SchemaAndByteArrayConverter
+from rsb.converter import PredicateConverterList, Converter
 from rsb import Event
 
-from rsb.protocol.introspection.Hello_pb2 import Hello
-from rsb.protocol.introspection.Bye_pb2 import Bye
 
-from rsb.converter import NoneConverter, DoubleConverter, Int64Converter, BoolConverter, StringConverter, BytesConverter
+class Forwarder(Converter):
+    def __init__(self):
+        super(Forwarder, self).__init__(bytearray, tuple, '.*')
+
+    def serialize(self, data):
+        return bytearray(data[1]), data[0]
+
+    def deserialize(self, data, wireSchema):
+        return wireSchema, data
 
 
 class Bridge(object):
     basic_types = {'integer': int, 'float': float, 'string': str, 'bool': bool}
 
-    def __init__(self, rsb_scope, wamp, message_type):
+    def __init__(self, rsb_scope, rsb_config, wamp, message_type):
         logging.info("register scopes:")
         self.rsb_scope = rsb_scope
         self.wamp_scope = rsb_scope[1:].replace('/', '.')
@@ -34,19 +40,19 @@ class Bridge(object):
             self.wamp_callback = self.send_rst
             self.rsb_callback = self.on_bytearray_message
             self.rsb_type = str('.' + message_type)
-        self.rsb_listener = rsb.createListener(self.rsb_scope)
+        self.rsb_listener = rsb.createListener(self.rsb_scope, config=rsb_config)
         self.rsb_listener.addHandler(self.rsb_callback)
-        self.rsb_publisher = rsb.createInformer(self.rsb_scope)
+        self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config)
 
     def on_bytearray_message(self, event):
         if 'wamp' in event.metaData.userInfos:
             logging.debug("received OWN rsb bytearray on %s, skipping..." % self.rsb_scope)
             return
         logging.debug('received rsb bytearray on %s' % self.rsb_scope)
-        logging.debug('event length %d' % len(event.data))
+        logging.debug('event length %d' % len(event.data[1]))
         logging.debug('sent to %s' % self.wamp_scope)
         try:
-            msg = '\0' + base64.b64encode(event.data).decode('ascii')
+            msg = '\0' + base64.b64encode(event.data[1]).decode('ascii')
             self.wamp.publish(self.wamp_scope, msg)
         except Exception as e:
             logging.error(e)
@@ -60,15 +66,14 @@ class Bridge(object):
         logging.debug("sent to %s" % self.wamp_scope)
         self.wamp.publish(self.wamp_scope, self.rsb_type(event.data))
 
-    def send_rst(self, event):
+    def send_rst(self, data):
         try:
             logging.info("send rst message to %s" % self.rsb_scope)
-            binary_data = bytearray(base64.b64decode(event[1:]))
-            ev = Event(scope=self.rsb_publisher.getScope(),
-                       data=(self.rsb_type, binary_data),
-                       type=tuple,
-                       userInfos={'wamp': ''})
-            self.rsb_publisher.publishEvent(ev)
+            binary_data = bytearray(base64.b64decode(data[1:]))
+            event = Event(scope=self.rsb_scope,
+                          data=(self.rsb_type, binary_data), type=tuple,
+                          userInfos={'wamp':''})
+            self.rsb_publisher.publishEvent(event)
         except Exception as e:
             logging.error(e)
             sys.exit(1)
@@ -92,6 +97,27 @@ class Bridge(object):
             self.rsb_publisher.deactivate()
 
 
+def create_rsb_config():
+    rsb_conf = copy.deepcopy(rsb.getDefaultParticipantConfig())
+    trans = rsb_conf.getTransports()
+    for t in trans:
+        convs = rsb.convertersFromTransportConfig(t)
+
+    conv = Forwarder()
+    conv_list = PredicateConverterList(bytearray)
+    conv_list.addConverter(conv,
+                           dataTypePredicate=lambda dataType: issubclass(dataType, tuple),
+                           wireSchemaPredicate=lambda wireSchema: wireSchema.startswith('.'))
+
+    for t in trans:
+        convs = rsb.convertersFromTransportConfig(t)
+        for c in convs.getConverters().values():
+            conv_list.addConverter(c,
+                                   dataTypePredicate=lambda dataType, dType=c.getDataType(): issubclass(dataType, dType))
+        t.converters = conv_list
+    return rsb_conf
+
+
 class SessionHandler(object):
 
     def __init__(self, wamp_session, log_level=logging.WARNING):
@@ -101,37 +127,14 @@ class SessionHandler(object):
 
         self.wamp_session = wamp_session
         self.scopes = {}
-        rsb_conf = copy.deepcopy(rsb.getDefaultParticipantConfig())
-        trans = rsb_conf.getTransports()
-        conv = SchemaAndByteArrayConverter()
-        conv_list = PredicateConverterList(bytearray)
-        conv_list.addConverter(conv,
-                               wireSchemaPredicate=lambda wireSchema: wireSchema.startswith('.')
-                               )
-
-        # register introspection types
-        for clazz in [Hello, Bye]:
-            converter = rsb.converter.ProtocolBufferConverter(messageClass=clazz)
-            conv_list.addConverter(converter)
-
-        default_converters = [NoneConverter(), DoubleConverter(), Int64Converter(), BoolConverter(),
-                              StringConverter(wireSchema="utf-8-string", dataType=str, encoding="utf_8"),
-                              BytesConverter()]
-
-        for converter in default_converters:
-            conv_list.addConverter(converter)
-
-        for t in trans:
-            t.converters = conv_list
-
-        rsb.setDefaultParticipantConfig(rsb_conf)
+        self.rsb_conf = create_rsb_config()
 
     def register_scope(self, rsb_scope, message_type):
         logging.info("trying to register on scope %s with message type %s" %
                      (rsb_scope, message_type))
 
         if rsb_scope not in self.scopes:
-            b = Bridge(rsb_scope, self.wamp_session, message_type)
+            b = Bridge(rsb_scope, self.rsb_conf, self.wamp_session, message_type)
             self.scopes[rsb_scope] = b
             return "Scope registered"
         return "Scope already exists"

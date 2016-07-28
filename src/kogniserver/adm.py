@@ -5,6 +5,7 @@ import subprocess
 import json
 import threading
 import time
+import sys
 
 from .async import main_entry as async_main
 
@@ -19,11 +20,14 @@ def run_crossbar(config_path, keep_alive):
         subprocess.call(['crossbar', 'start', '--config=%s' % config_path])
 
 
-def main_entry():
+def main_entry(args=None):
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--force', help='overwrite config file if it already exists', action='store_true')
     parser.add_argument('-k', '--keep-alive', help='use existing crossbar instance', action='store_true')
-    args = parser.parse_args()
+    parser.add_argument('-c', '--config', help='location of the config file')
+    args = sys.argv[1:] if args is None else args
+    args = parser.parse_args(args)
 
     pwd = abspath(__file__)
     elems = re.compile('[\\\\/]+').split(pwd)
@@ -33,7 +37,8 @@ def main_entry():
     else:
         elems = elems[:-1]
     prefix = join("/", *elems)
-    config_path = join(prefix, 'etc/crossbar/config.json')
+
+    config_path = join(prefix, 'etc/crossbar/config.json') if not args.config else args.config
 
     choice = 'n'
     if exists(config_path) is False:
@@ -46,7 +51,7 @@ def main_entry():
                 input_valid = True
 
     if choice in 'y' or args.force:
-        default_path = join(prefix, 'share/rst0.12/proto')
+        default_path = config_path
         input_valid = False
         while not input_valid:
             protopath = raw_input("Location of proto-files? [%s]:" % default_path) or default_path
@@ -59,7 +64,7 @@ def main_entry():
             print "Config file already exists! Use --force to overwrite."
             return
 
-        with open(join(prefix, 'etc/crossbar/config.json'), 'w') as target:
+        with open(config_path, 'w') as target:
             j = json.loads(CONFIG_JSON)
             paths = j['workers'][0]['transports'][0]['paths']
             paths['/']['directory'] = join(prefix, paths['/']['directory'])
@@ -82,56 +87,64 @@ if __name__ == '__main__':
 
 CONFIG_JSON = """
 {
-   "controller": {
-   },
-   "workers": [
-      {
-         "type": "router",
-         "options": {
-            "pythonpath": [""]
-         },
-         "realms": [
-            {
-               "name": "realm1",
-               "roles": [
-                  {
-                     "name": "anonymous",
-                     "permissions": [
-                        {
-                           "uri": "*",
-                           "publish": true,
-                           "subscribe": true,
-                           "call": true,
-                           "register": true
-                        }
-                     ]
-                  }
-               ]
+  "version": 2,
+  "controller": {},
+  "workers": [
+    {
+      "transports": [
+        {
+          "paths": {
+            "ws": {
+              "type": "websocket"
+            },
+            "/": {
+              "directory": "var/www/kogniserver",
+              "type": "static"
+            },
+            "proto": {
+              "directory": "./config.json",
+              "type": "static"
             }
-         ],
-         "transports": [
+          },
+          "endpoint": {
+            "type": "tcp",
+            "port": 8181
+          },
+          "type": "web"
+        }
+      ],
+      "type": "router",
+      "options": {
+        "pythonpath": [""]
+      },
+      "realms": [
+        {
+          "name": "realm1",
+          "roles": [
             {
-               "type": "web",
-               "endpoint": {
-                  "type": "tcp",
-                  "port": 8181
-               },
-               "paths": {
-                  "ws": {
-                    "type": "websocket"
+              "name": "anonymous",
+              "permissions": [
+                {
+                  "uri": "",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "register": true,
+                    "publish": true,
+                    "subscribe": true
                   },
-                  "/": {
-                     "type": "static",
-                     "directory": "var/www/kogniserver"
+                  "disclose": {
+                    "caller": false,
+                    "publisher": false
                   },
-                  "proto": {
-                    "type": "static",
-                    "directory": ""
-                  }
-               }
+                  "cache": true
+                }
+              ]
             }
-         ]
-      }
-   ]
+          ]
+        }
+      ]
+    }
+  ]
 }
 """

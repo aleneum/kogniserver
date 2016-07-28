@@ -42,7 +42,7 @@ class Component(ApplicationSession):
         if os.environ.get('DEBUG') in ['1','True','true','TRUE']:
             log_level = logging.DEBUG
         else:
-            log_level = logging.WARN
+            log_level = logging.INFO
         logging.basicConfig()
         logging.getLogger().setLevel(log_level)
         self.session = SessionHandler(self, log_level)
@@ -63,7 +63,7 @@ class Component(ApplicationSession):
         while self.ping.isAlive():
             time.sleep(0.1)
         self.session.quit()
-        print("kogniserver session left...")
+        print "kogniserver session left..."
 
 
 def main_entry():
@@ -74,6 +74,7 @@ def main_entry():
     except KeyboardInterrupt or Exception:
         raise KeyboardInterrupt
     print "shutting down kogniserver..."
+
 
 if __name__ == '__main__':
     main_entry()

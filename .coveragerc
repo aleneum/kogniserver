@@ -1,3 +1,2 @@
 [run]
-source = kogniserver
-include = */kogniserver/*
+source = src
