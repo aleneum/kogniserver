@@ -29,6 +29,10 @@ class TestKogniServerAdm(TestCase):
         if exists('./config.test.json'):
             remove('./config.test.json')
 
+    def tearDown(self):
+        if exists('./config.test.json'):
+            remove('./config.test.json')
+
     def test_start(self):
         args = ['-c', './config.test.json', '-f']
         run_crossbar(args)
