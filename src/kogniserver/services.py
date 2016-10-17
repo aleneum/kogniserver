@@ -20,7 +20,7 @@ class Forwarder(Converter):
 
 
 class Bridge(object):
-    basic_types = {'integer': int, 'float': float, 'string': str, 'bool': bool}
+    basic_types = {'integer': int, 'float': float, 'string': lambda s: s, 'bool': bool}
 
     def __init__(self, rsb_scope, rsb_config, wamp, message_type):
         logging.info("register scopes:")
@@ -80,10 +80,10 @@ class Bridge(object):
 
     def send_primitive_data(self, data):
         try:
-            logging.info("send primitive message [%s] message to %s" % (str(data), self.rsb_scope))
+            logging.info("send primitive message [%s] message to %s" % (unicode(data), self.rsb_scope))
             self.rsb_publisher.publishData(self.rsb_type(data))
         except Exception as e:
-            logging.error("Error while sending data: %s" % e.message)
+            logging.error("Error while sending primitive data: %s" % str(e))
             sys.exit(1)
 
     def on_wamp_message(self, event):
@@ -106,14 +106,18 @@ def create_rsb_config():
     conv = Forwarder()
     conv_list = PredicateConverterList(bytearray)
     conv_list.addConverter(conv,
-                           dataTypePredicate=lambda dataType: issubclass(dataType, tuple),
-                           wireSchemaPredicate=lambda wireSchema: wireSchema.startswith('.'))
+                           dataTypePredicate=lambda data_type: issubclass(data_type, tuple),
+                           wireSchemaPredicate=lambda wire_schema: wire_schema.startswith('.'))
 
     for t in trans:
         convs = rsb.convertersFromTransportConfig(t)
         for c in convs.getConverters().values():
             conv_list.addConverter(c,
-                                   dataTypePredicate=lambda dataType, dType=c.getDataType(): issubclass(dataType, dType))
+                                   dataTypePredicate=lambda data_type, d_type=c.getDataType():\
+                                       issubclass(data_type, d_type))
+        c = rsb.converter.StringConverter()
+        conv_list.addConverter(c, dataTypePredicate=lambda data_type, d_type=c.getDataType():\
+                                       issubclass(data_type, d_type))
         t.converters = conv_list
     return rsb_conf
 

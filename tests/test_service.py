@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from unittest import TestCase
 from kogniserver.services import SessionHandler
 from mock import MagicMock
@@ -7,6 +9,7 @@ import time
 from Value_pb2 import Value
 import base64
 import threading
+
 
 def send_primitive(session, data, type):
     passed = MagicMock()
@@ -79,7 +82,7 @@ class TestKogniServerService(TestCase):
             lock.release()
 
         rsb.converter.registerGlobalConverter(
-        rsb.converter.ProtocolBufferConverter(messageClass=Value), True)
+            rsb.converter.ProtocolBufferConverter(messageClass=Value), True)
         self.session.register_scope('/test/scope', 'rst.generic.Value')
         with rsb.createListener('/test/scope', config=self.session.rsb_conf) as listener:
             listener.addHandler(partial(raw_received, self.passed, self.lock))
@@ -98,7 +101,7 @@ class TestKogniServerService(TestCase):
             lock.release()
 
         rsb.converter.registerGlobalConverter(
-        rsb.converter.ProtocolBufferConverter(messageClass=Value), True)
+            rsb.converter.ProtocolBufferConverter(messageClass=Value), True)
         self.session.register_scope('/test/scope', 'rst.generic.Value')
         with rsb.createListener('/test/scope') as listener:
             listener.addHandler(partial(protobuf_received, self.passed, self.lock))
@@ -110,9 +113,17 @@ class TestKogniServerService(TestCase):
             self.lock.acquire()
         self.assertTrue(self.passed.called)
 
-    def test_wamp_primitive(self):
+    def test_wamp_string(self):
         self.session.register_scope('/test/scope', 'string')
         self.session.scopes['/test/scope'].on_wamp_message('hello')
+
+    def test_wamp_float(self):
+        self.session.register_scope('/test/scope', 'float')
+        self.session.scopes['/test/scope'].on_wamp_message(0.1)
+
+    def test_wamp_unicode(self):
+        self.session.register_scope('/test/scope', 'string')
+        self.session.scopes['/test/scope'].on_wamp_message(u'hellö')
 
     def test_wamp_protobuf(self):
         def raw_received(session, event):
