@@ -24,45 +24,50 @@ $ # python setup.py install --prefix=/usr/local
 `/install/path` should be the *root* of your preferred environment and will be concatenated with *'lib/python2.7/site-packages'*. Make sure that `/install/path/lib/python2.7/site-packages` is in your `PYTHONPATH`.
 
 
-### Configuration
+### Configuration and Starting
 
-To configure crossbar you need to create a `config.json` and tell crossbar where to find it. `kogniserver` comes with an administration tool which will create a typical crossbar configuration and get you started.
-
-```bash
-$ kogniserver-adm configure --protopath=/path/to/proto/files
-$ # kogniserver-adm configure --protopath=/usr/local/share/rst0.12/proto
-```
-
-This will create a common config.json at `/install/path/etc/crossbar.json.
-`-p, --protopath=` is an optional argument and can be used if protocol buffer files are already installed.
- If provided, the proto path will be linked under '/server_root/proto' into the server environment.
-
-
-### Starting
-
-The easiest way to start crossbar and kogniserver is again with the kogniserver-adm tool.
+To configure crossbar you need to create a `config.json` and tell crossbar where to find it. `kogniserver` will assist you in creating a file if it cannot find one.
 
 ```bash
-$ kogniserver-adm start
+$ kogniserver 
+config.json for crossbar does not exists. Should a default one be created? [y]/n:y
+Location of proto-files? [/usr/local/share/rst0.12/proto]:/usr/local/share/rst0.12/proto/
+No Crossbar.io instance is currently running from node directory /home/foobar/kogniserver.
+...
 ```
 
-`Ctrl+C` or a `SIGTERM` will exit the server as well as the administration tool.
+This will create a common config.json at `/install/path/etc/crossbar/config.json` (e.g. `/usr/local/etc...`)
+If you like to use an existing config.json you can use the `-c` option:
+```bash
+$ kogniserver -c /path/to/your/crossbar/config.json
+...
+```
+
+To overwrite an existing config.json at `/install/path/etc/crossbar/config.json`, start `kogniserver` with `-f`:
+```bash
+$ kogniserver -f
+Location of proto-files? [/usr/local/share/rst0.12/proto]:
+...
+```
 
 Alternatively you can start crossbar and kogniserver individually. First start a crossbar instance:
-
 ```bash
 $ crossbar start --config=/path/to/config.json
 ```
 
-After that you can initialize kogniserver:
-
+After that you can initialize `kogniserver`:
 ```
-$ kogniserver
+$ kogniserver -k # --keep-alive; use existing crossbar instance
 kogniserver(asyncio) started...
 ```
 
+The `--keep-alive` flag will tell `kogniserver` to use the running instance. If it is not passed, `kogniserver` will
+try to shutdown this instance and start a new one.
+
 If you use the standard configuration, files will be hosted under `/install/path/var/www/kogniserver` and can be reached via
 `http://localhost:8181`.
+
+`Ctrl+C` or a `SIGTERM` will exit the server.
 
 ### What now?
 
