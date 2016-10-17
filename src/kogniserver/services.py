@@ -78,12 +78,12 @@ class Bridge(object):
             logging.error(e)
             sys.exit(1)
 
-    def send_primitive_data(self, event):
+    def send_primitive_data(self, data):
         try:
-            logging.info("send primitive message [%s] message to %s" % (str(event), self.rsb_scope))
-            self.rsb_publisher.publishData(event)
+            logging.info("send primitive message [%s] message to %s" % (str(data), self.rsb_scope))
+            self.rsb_publisher.publishData(self.rsb_type(data))
         except Exception as e:
-            logging.error(e)
+            logging.error("Error while sending data: %s" % e.message)
             sys.exit(1)
 
     def on_wamp_message(self, event):

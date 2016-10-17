@@ -1,5 +1,6 @@
 import argparse
-from os.path import abspath, exists, join
+from os import makedirs
+from os.path import abspath, exists, join, dirname
 import re
 import subprocess
 import json
@@ -51,7 +52,7 @@ def main_entry(args=None):
                 input_valid = True
 
     if choice in 'y' or args.force:
-        default_path = config_path
+        default_path = join(prefix, 'share/rst0.12/proto')
         input_valid = False
         while not input_valid:
             protopath = raw_input("Location of proto-files? [%s]:" % default_path) or default_path
@@ -63,6 +64,9 @@ def main_entry(args=None):
         if exists(config_path) and not args.force:
             print "Config file already exists! Use --force to overwrite."
             return
+        else:
+            if not exists(dirname(config_path)):
+                makedirs(dirname(config_path))
 
         with open(config_path, 'w') as target:
             j = json.loads(CONFIG_JSON)

@@ -1,3 +1,4 @@
 [run]
 source = kogniserver
-omit = */python2.7/*
+omit =
+    */python2.7/*
