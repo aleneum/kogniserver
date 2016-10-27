@@ -17,7 +17,7 @@ or cloned and installed from github
 ```bash
 $ git clone https://github.com/aleneum/kogniserver.git
 $ cd kogniserver
-$ python setup.py install (--prefix=/install/path/prefx)
+$ python setup.py install (--prefix=/install/path/prefix)
 $ # python setup.py install --prefix=/usr/local
 ```
 

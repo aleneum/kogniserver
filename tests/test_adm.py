@@ -10,7 +10,7 @@ from os.path import exists
 from os import remove
 
 def terminate():
-    time.sleep(7)
+    time.sleep(8)
     subprocess.call(['crossbar', 'stop'])
     time.sleep(2)
     thread.interrupt_main()

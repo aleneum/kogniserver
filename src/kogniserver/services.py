@@ -21,17 +21,23 @@ class Forwarder(Converter):
 
 class Bridge(object):
     basic_types = {'integer': int, 'float': float, 'string': lambda s: s, 'bool': bool}
+    RSB_TO_WAMP = 1
+    WAMP_TO_RSB = 2
+    BIDIRECTIONAL = 3
 
-    def __init__(self, rsb_scope, rsb_config, wamp, message_type):
+    def __init__(self, rsb_scope, rsb_config, wamp, message_type, mode=BIDIRECTIONAL, wamp_scope=None):
         logging.info("register scopes:")
+        self.mode = mode
         self.rsb_scope = rsb_scope
-        self.wamp_scope = rsb_scope[1:].replace('/', '.')
+        self.wamp_scope = rsb_scope[1:].replace('/', '.') if wamp_scope is None else wamp_scope
         self.converter = None
-        self.skipNext = False;
+        self.skipNext = False
+        self.rsb_publisher = None
+        self.rsb_listener = None
         logging.info("RSB Scope %s" % self.rsb_scope)
         logging.info("WAMP Scope is %s" % self.wamp_scope)
         self.wamp = wamp
-        self.wamp_listener = self.wamp.subscribe(self.on_wamp_message, self.wamp_scope)
+
         if message_type in Bridge.basic_types:
             self.wamp_callback = self.send_primitive_data
             self.rsb_callback = self.on_primitive_message
@@ -40,9 +46,18 @@ class Bridge(object):
             self.wamp_callback = self.send_rst
             self.rsb_callback = self.on_bytearray_message
             self.rsb_type = str('.' + message_type)
-        self.rsb_listener = rsb.createListener(self.rsb_scope, config=rsb_config)
-        self.rsb_listener.addHandler(self.rsb_callback)
-        self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config)
+
+        # RSB_TO_WAMP
+        if mode % 2 > 0:
+            logging.info('listening on rsb scope %s' % self.rsb_scope)
+            self.rsb_listener = rsb.createListener(self.rsb_scope, config=rsb_config)
+            self.rsb_listener.addHandler(self.rsb_callback)
+
+        # WAMP_TO_RSB
+        if mode > 1:
+            logging.info('listening on wamp scope %s' % self.wamp_scope)
+            self.wamp_listener = self.wamp.subscribe(self.on_wamp_message, self.wamp_scope)
+            self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config)
 
     def on_bytearray_message(self, event):
         if 'wamp' in event.metaData.userInfos:
@@ -92,8 +107,9 @@ class Bridge(object):
 
     def shutdown(self):
         logging.info("Shutting down bridge...")
-        self.rsb_listener.deactivate()
-        if self.rsb_publisher is not False:
+        if self.rsb_listener:
+            self.rsb_listener.deactivate()
+        if self.rsb_publisher:
             self.rsb_publisher.deactivate()
 
 
@@ -113,11 +129,10 @@ def create_rsb_config():
         convs = rsb.convertersFromTransportConfig(t)
         for c in convs.getConverters().values():
             conv_list.addConverter(c,
-                                   dataTypePredicate=lambda data_type, d_type=c.getDataType():\
-                                       issubclass(data_type, d_type))
+                                   dataTypePredicate=lambda data_type, d_type=c.getDataType(): issubclass(data_type, d_type))
         c = rsb.converter.StringConverter()
-        conv_list.addConverter(c, dataTypePredicate=lambda data_type, d_type=c.getDataType():\
-                                       issubclass(data_type, d_type))
+        conv_list.addConverter(c,
+                               dataTypePredicate=lambda data_type, d_type=c.getDataType(): issubclass(data_type, d_type))
         t.converters = conv_list
     return rsb_conf
 

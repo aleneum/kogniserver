@@ -8,7 +8,7 @@ import threading
 import time
 import sys
 
-from .async import main_entry as async_main
+from .server import main_entry as async_main
 
 
 def run_crossbar(config_path, keep_alive):

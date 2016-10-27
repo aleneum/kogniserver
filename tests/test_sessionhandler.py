@@ -29,7 +29,7 @@ def send_primitive(session, data, type):
     return passed.called
 
 
-class TestKogniServerService(TestCase):
+class TestKogniServerSessionHandler(TestCase):
 
     def setUp(self):
         wamp = MagicMock()

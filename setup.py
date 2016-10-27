@@ -17,10 +17,11 @@ setup(
     include_package_data=True,
     zip_safe=False,
     tests_require=['nose>=1.3', 'coverage'],
-    install_requires=['txaio', 'pyasn1', 'autobahn', 'crossbar', 'trollius', 'rsb-python<0.13.0'],
+    install_requires=['txaio', 'pyasn1', 'autobahn', 'crossbar', 'trollius', 'rsb-python'],
     entry_points={
         "console_scripts": [
-            "kogniserver = kogniserver.adm:main_entry"
+            "kogniserver = kogniserver.adm:main_entry",
+            "kogniclient = kogniserver.client:maint_entry"
         ]
     },
     license='MIT',
