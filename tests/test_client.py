@@ -39,7 +39,6 @@ class TestKogniServerClient(TestCase):
     def tearDown(self):
         if exists('./config.test.json'):
             remove('./config.test.json')
-        self.c.onLeave(None)
 
     def test_start(self):
         args = ['ws://127.0.0.1:8181/ws', '/foo/bar <string> * ; /foo/baz <string> /foo/baz2']
@@ -48,7 +47,10 @@ class TestKogniServerClient(TestCase):
     def test_scopes_splitting(self):
         self.c = Client(config=MagicMock(), scopes="/foo/bar <string> *")
         self.assertEqual(len(self.c._scopes), 1)
+        self.c.onLeave(None)
         self.c = Client(config=MagicMock(), scopes="/foo/bar <string> * ; /bar/baz <mooh> bar.baz")
         self.assertEqual(len(self.c._scopes), 2)
+        self.c.onLeave(None)
+
 
 
