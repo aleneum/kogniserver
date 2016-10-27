@@ -1,5 +1,6 @@
 from unittest import TestCase
 from kogniserver.client import main_entry, Client
+from kogniserver.adm import main_entry as admin_main
 from mock import MagicMock
 import threading
 import subprocess
@@ -11,14 +12,13 @@ from os import remove
 
 
 def terminate():
-    time.sleep(8)
-    subprocess.call(['crossbar', 'stop'])
-    time.sleep(2)
     thread.interrupt_main()
+    time.sleep(2)
+    subprocess.call(['crossbar', 'stop'])
 
 
 def start_crossbar():
-    subprocess.call(['crossbar', 'start'])
+    subprocess.call(['crossbar', 'start', '--config', './config.test.json'])
 
 
 def run_crossbar(args):
@@ -35,6 +35,8 @@ class TestKogniServerClient(TestCase):
     def setUp(self):
         if exists('./config.test.json'):
             remove('./config.test.json')
+        args = ['-c', './config.test.json', '-f', '-g']
+        admin_main(args)
 
     def tearDown(self):
         if exists('./config.test.json'):
@@ -51,6 +53,7 @@ class TestKogniServerClient(TestCase):
         self.c = Client(config=MagicMock(), scopes="/foo/bar <string> * ; /bar/baz <mooh> bar.baz")
         self.assertEqual(len(self.c._scopes), 2)
         self.c.onLeave(None)
+
 
 
 

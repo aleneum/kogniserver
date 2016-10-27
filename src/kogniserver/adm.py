@@ -27,6 +27,7 @@ def main_entry(args=None):
     parser.add_argument('-f', '--force', help='overwrite config file if it already exists', action='store_true')
     parser.add_argument('-k', '--keep-alive', help='use existing crossbar instance', action='store_true')
     parser.add_argument('-c', '--config', help='location of the config file')
+    parser.add_argument('-g', '--generate', help='only generate config file (with default options)', action='store_true')
     args = sys.argv[1:] if args is None else args
     args = parser.parse_args(args)
 
@@ -43,20 +44,20 @@ def main_entry(args=None):
 
     choice = 'n'
     if exists(config_path) is False:
-        input_valid = False
+        input_valid = False if not args.generate else True
         while not input_valid:
             choice = raw_input("config.json for crossbar does not exists. Should a default one be created? [y]/n:") or 'y'
-            if choice not in ['y','n']:
+            if choice not in ['y', 'n']:
                 print("please enter 'y' or 'n'.")
             else:
                 input_valid = True
 
     if choice in 'y' or args.force:
-        default_path = join(prefix, 'share/rst0.12/proto')
-        input_valid = False
+        protopath = join(prefix, 'share/rst0.12/proto')
+        input_valid = False if not args.generate else True
         while not input_valid:
-            protopath = raw_input("Location of proto-files? [%s]:" % default_path) or default_path
-            if not exists(protopath):
+            protopath = raw_input("Location of proto-files? [%s]:" % protopath) or protopath
+            if not exists(protopath) and not args.generate:
                 print("%s does not exist!" % protopath)
             else:
                 input_valid = True
@@ -77,6 +78,10 @@ def main_entry(args=None):
             else:
                 del paths['proto']
             json.dump(j, target, indent=4)
+
+    # In a dry generation run we can exit here
+    if args.generate:
+        return
 
     t1 = threading.Thread(target=run_crossbar, args=(config_path,args.keep_alive,))
     t1.setDaemon(True)

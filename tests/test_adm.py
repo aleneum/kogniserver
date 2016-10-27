@@ -9,6 +9,7 @@ import thread
 from os.path import exists
 from os import remove
 
+
 def terminate():
     time.sleep(8)
     subprocess.call(['crossbar', 'stop'])
@@ -36,3 +37,10 @@ class TestKogniServerAdm(TestCase):
     def test_start(self):
         args = ['-c', './config.test.json', '-f']
         run_crossbar(args)
+
+    def test_generate(self):
+        args = ['-c', './config.test.json', '-f', '-g']
+        main_entry(args)
+        self.assertTrue(exists('./config.test.json'))
+
+
