@@ -97,11 +97,11 @@ def check_server(address, port):
     s = socket.socket()
     try:
         s.connect((address, port))
-        print "Connected to %s on port %s" % (address, port)
+        #print "Connected to %s on port %s" % (address, port)
         s.close()
         return True
     except socket.error, e:
-        print "Connection to %s on port %s failed: %s" % (address, port, e)
+        #print "Connection to %s on port %s failed: %s" % (address, port, e)
         return False
 
 if __name__ == '__main__':
