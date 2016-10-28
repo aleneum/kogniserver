@@ -1,6 +1,7 @@
 from unittest import TestCase
 from kogniserver.client import main_entry, Client
 from kogniserver.adm import main_entry as admin_main
+from kogniserver.adm import check_server
 from mock import MagicMock
 import threading
 import subprocess
@@ -24,7 +25,8 @@ def start_crossbar():
 def run_crossbar(args):
     s = threading.Thread(target=start_crossbar)
     s.start()
-    time.sleep(8)
+    while not check_server('localhost', 8181):
+        time.sleep(0.5)
     t = threading.Thread(target=terminate)
     t.start()
     main_entry(args)
