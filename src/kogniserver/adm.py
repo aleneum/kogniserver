@@ -111,7 +111,7 @@ CONFIG_JSON = """
               "type": "static"
             },
             "proto": {
-              "directory": "./config.json",
+              "directory": "share/rst0.12/proto",
               "type": "static"
             }
           },
