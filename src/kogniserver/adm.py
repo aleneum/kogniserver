@@ -3,9 +3,10 @@ from os import makedirs
 from os.path import abspath, exists, join, dirname
 import re
 import subprocess
+import time
 import json
 import threading
-import time
+import socket
 import sys
 
 from .server import main_entry as async_main
@@ -86,12 +87,26 @@ def main_entry(args=None):
     t1 = threading.Thread(target=run_crossbar, args=(config_path,args.keep_alive,))
     t1.setDaemon(True)
     t1.start()
-    time.sleep(5)
+    while not check_server('localhost', 8181):
+        time.sleep(0.5)
     async_main()
 
 
+def check_server(address, port):
+    # Create a TCP socket
+    s = socket.socket()
+    try:
+        s.connect((address, port))
+        print "Connected to %s on port %s" % (address, port)
+        s.close()
+        return True
+    except socket.error, e:
+        print "Connection to %s on port %s failed: %s" % (address, port, e)
+        return False
+
 if __name__ == '__main__':
     main_entry()
+
 
 
 CONFIG_JSON = """
