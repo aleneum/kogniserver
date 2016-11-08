@@ -6,13 +6,14 @@ from functools import partial
 
 from .services import Bridge, create_rsb_config
 
-try:
-    import asyncio
-except ImportError:
-    # Trollius >= 0.3 was renamed
-    import trollius as asyncio
+# try:
+#     import asyncio
+# except ImportError:
+#     # Trollius >= 0.3 was renamed
+#     import trollius as asyncio
 
-from autobahn.asyncio.wamp import ApplicationSession
+from twisted.internet.defer import inlineCallbacks
+from autobahn.twisted.wamp import ApplicationSession
 
 
 class Client(ApplicationSession):
@@ -23,7 +24,7 @@ class Client(ApplicationSession):
         self.config = create_rsb_config()
         super(Client, self).__init__(config)
 
-    @asyncio.coroutine
+    @inlineCallbacks
     def onJoin(self, details):
         # init members
         if os.environ.get('DEBUG') in ['1', 'True', 'true', 'TRUE']:
@@ -34,7 +35,7 @@ class Client(ApplicationSession):
         logging.getLogger().setLevel(log_level)
         for mapping in self._scopes:
             self.bridges.append(Bridge(**self.parse_mapping(mapping)))
-        print 'client(asyncio) connected...'
+        print 'client(twisted) connected...'
 
     def parse_mapping(self, mapping):
         source, direction, destination = mapping.split(' ')
@@ -56,7 +57,7 @@ class Client(ApplicationSession):
 
 
 def main_entry(args=None):
-    from autobahn.asyncio.wamp import ApplicationRunner
+    from autobahn.twisted.wamp import ApplicationRunner
 
     parser = argparse.ArgumentParser()
     parser.add_argument('url', metavar='URL', type=unicode, help="URL to websocket of WAMP server")

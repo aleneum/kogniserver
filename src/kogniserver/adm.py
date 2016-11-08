@@ -9,7 +9,7 @@ import threading
 import socket
 import sys
 
-from .server import main_entry as async_main
+from .twist import main_entry as async_main
 
 
 def run_crossbar(config_path, keep_alive):
@@ -70,14 +70,32 @@ def main_entry(args=None):
             if not exists(dirname(config_path)):
                 makedirs(dirname(config_path))
 
+        ssl_cert = False
+        input_valid = False if not args.generate else True
+        while not input_valid:
+            ssl_cert = raw_input("Location of TLS certificate (without .crt and .key) if needed."
+                                 "Leave empty if not needed:") or ssl_cert
+            input_valid = True
+            if ssl_cert:
+                if not exists(ssl_cert + ".crt"):
+                    print("%s does not exist!" % (ssl_cert + ".crt"))
+                    input_valid = True
+                    ssl_cert = False
+
         with open(config_path, 'w') as target:
             j = json.loads(CONFIG_JSON)
-            paths = j['workers'][0]['transports'][0]['paths']
-            paths['/']['directory'] = join(prefix, paths['/']['directory'])
+            paths = j['workers'][0]['transports'][0]
+            paths['paths']['/']['directory'] = join(prefix, paths['paths']['/']['directory'])
             if protopath:
-                paths['proto']['directory'] = protopath
+                paths['paths']['proto']['directory'] = protopath
             else:
-                del paths['proto']
+                del paths['paths']['proto']
+            if ssl_cert:
+                paths['endpoint']['tls']['key'] = ssl_cert + '.key'
+                paths['endpoint']['tls']['certificate'] = ssl_cert + '.crt'
+            else:
+                del paths['endpoint']['tls']
+
             json.dump(j, target, indent=4)
 
     # In a dry generation run we can exit here
@@ -95,6 +113,7 @@ def main_entry(args=None):
         if 'tls' in j['workers'][0]['transports'][0]['endpoint']:
             ssl_cert = j['workers'][0]['transports'][0]['endpoint']['tls']['certificate']
     async_main(ssl_cert)
+
 
 def check_server(address, port):
     # Create a TCP socket
@@ -136,7 +155,11 @@ CONFIG_JSON = """
           },
           "endpoint": {
             "type": "tcp",
-            "port": 8181
+            "port": 8181,
+            "tls": {
+                "key": "server.key",
+                "certificate": "server.crt"
+            }
           },
           "type": "web"
         }

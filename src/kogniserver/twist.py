@@ -1,17 +1,13 @@
 import logging
 import os
 from threading import Thread
-import time
 
-try:
-    import asyncio
-except ImportError:
-    # Trollius >= 0.3 was renamed
-    import trollius as asyncio
+from twisted.internet.defer import inlineCallbacks
+from time import sleep
 
-from autobahn.asyncio.wamp import ApplicationSession
+from autobahn.twisted.wamp import ApplicationSession
+
 from services import SessionHandler
-
 
 class Ping(Thread):
     def __init__(self, wamp):
@@ -24,7 +20,7 @@ class Ping(Thread):
             while self.running:
                 logging.debug("ping")
                 self.wamp.publish("com.wamp.ping", "ping")
-                time.sleep(1)
+                sleep(1)
         except Exception as e:
             logging.debug(e)
             raise e
@@ -36,9 +32,8 @@ class Component(ApplicationSession):
     def on_ping(event):
         logging.debug(event)
 
-    @asyncio.coroutine
+    @inlineCallbacks
     def onJoin(self, details):
-        # init members
         if os.environ.get('DEBUG') in ['1','True','true','TRUE']:
             log_level = logging.DEBUG
         else:
@@ -56,25 +51,35 @@ class Component(ApplicationSession):
         self.ping = Ping(self)
         self.ping.start()
 
-        print 'kogniserver(asyncio) started...'
+        print 'kogniserver(twisted) started...'
 
     def onLeave(self, details):
         self.ping.running = False
         while self.ping.isAlive():
-            time.sleep(0.1)
+            sleep(0.1)
         self.session.quit()
         print "kogniserver session left..."
 
 
 def main_entry(ssl_cert=None):
-    from autobahn.asyncio.wamp import ApplicationRunner
+    from autobahn.twisted.wamp import ApplicationRunner
     proto = "wss" if ssl_cert else "ws"
     options = None
     if ssl_cert:
-        import ssl
-        print "CERT_PATH: " + ssl_cert
-        #ssl._https_verify_certificates(enable=True)
-        options = ssl._create_unverified_context()
+        from OpenSSL import crypto
+        import six
+        from twisted.internet._sslverify import OpenSSLCertificateAuthorities
+        from twisted.internet.ssl import CertificateOptions
+        from OpenSSL import crypto
+
+        cert = crypto.load_certificate(
+            crypto.FILETYPE_PEM,
+            six.u(open(ssl_cert, 'r').read())
+        )
+        # tell Twisted to use just the one certificate we loaded to verify connections
+        options = CertificateOptions(
+            trustRoot=OpenSSLCertificateAuthorities([cert]),
+        )
     runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
     try:
@@ -82,7 +87,6 @@ def main_entry(ssl_cert=None):
     except KeyboardInterrupt or Exception:
         raise KeyboardInterrupt
     print "shutting down kogniserver..."
-
 
 if __name__ == '__main__':
     main_entry()

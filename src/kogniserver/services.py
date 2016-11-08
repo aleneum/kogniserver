@@ -1,4 +1,3 @@
-import sys
 import base64
 import logging
 import copy
@@ -71,13 +70,12 @@ class Bridge(object):
             self.wamp.publish(self.wamp_scope, msg)
         except Exception as e:
             logging.error(e)
-            sys.exit(1)
 
     def on_primitive_message(self, event):
         if 'wamp' in event.metaData.userInfos:
             logging.debug("received OWN rsb primitive on %s, skipping..." % self.rsb_scope)
             return
-        logging.debug("received rsb primitive [%s] on %s" % (str(event.data), self.rsb_scope))
+        logging.info("received primitive message [%s] on scope %s" % (event.data.decode("utf8"), self.rsb_scope))
         logging.debug("sent to %s" % self.wamp_scope)
         self.wamp.publish(self.wamp_scope, self.rsb_type(event.data))
 
@@ -87,19 +85,17 @@ class Bridge(object):
             binary_data = bytearray(base64.b64decode(data[1:]))
             event = Event(scope=self.rsb_scope,
                           data=(self.rsb_type, binary_data), type=tuple,
-                          userInfos={'wamp':''})
+                          userInfos={'wamp': ''})
             self.rsb_publisher.publishEvent(event)
         except Exception as e:
             logging.error(e)
-            sys.exit(1)
 
     def send_primitive_data(self, data):
         try:
             logging.info("send primitive message [%s] message to %s" % (unicode(data), self.rsb_scope))
-            self.rsb_publisher.publishData(self.rsb_type(data))
+            self.rsb_publisher.publishData(self.rsb_type(data), userInfos={'wamp': ''})
         except Exception as e:
             logging.error("Error while sending primitive data: %s" % str(e))
-            sys.exit(1)
 
     def on_wamp_message(self, event):
         logging.debug('Received wamp message on %s' % self.wamp_scope)
@@ -151,7 +147,6 @@ class SessionHandler(object):
     def register_scope(self, rsb_scope, message_type):
         logging.info("trying to register on scope %s with message type %s" %
                      (rsb_scope, message_type))
-        return "JUUUUUUHUUUU"
 
         if rsb_scope not in self.scopes:
             b = Bridge(rsb_scope, self.rsb_conf, self.wamp_session, message_type)

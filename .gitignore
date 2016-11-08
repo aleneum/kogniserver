@@ -11,3 +11,8 @@ node.key
 *.priv
 *.pub
 *.pid
+*.crt
+
+*.key
+
+tests/config.test.json
