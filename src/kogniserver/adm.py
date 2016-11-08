@@ -89,8 +89,10 @@ def main_entry(args=None):
     t1.start()
     while not check_server('localhost', 8181):
         time.sleep(0.5)
-    async_main()
-
+    with open(config_path) as crossbar_config:
+        j = json.load(crossbar_config)
+        use_ssl = 'tls' in j['workers'][0]['transports'][0]['endpoint']
+    async_main(use_ssl)
 
 def check_server(address, port):
     # Create a TCP socket

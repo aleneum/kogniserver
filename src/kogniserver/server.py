@@ -66,9 +66,10 @@ class Component(ApplicationSession):
         print "kogniserver session left..."
 
 
-def main_entry():
+def main_entry(use_ssl=False):
     from autobahn.asyncio.wamp import ApplicationRunner
-    runner = ApplicationRunner(url=u"ws://127.0.0.1:8181/ws", realm=u"realm1")
+    proto = "wss" if use_ssl else "ws"
+    runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto), realm=u"realm1")
     try:
         runner.run(Component)
     except KeyboardInterrupt or Exception:
