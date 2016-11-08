@@ -91,8 +91,10 @@ def main_entry(args=None):
         time.sleep(0.5)
     with open(config_path) as crossbar_config:
         j = json.load(crossbar_config)
-        use_ssl = 'tls' in j['workers'][0]['transports'][0]['endpoint']
-    async_main(use_ssl)
+        ssl_cert = None
+        if 'tls' in j['workers'][0]['transports'][0]['endpoint']:
+            ssl_cert = j['workers'][0]['transports'][0]['endpoint']['tls']['certificate']
+    async_main(ssl_cert)
 
 def check_server(address, port):
     # Create a TCP socket
