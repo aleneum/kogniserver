@@ -73,8 +73,8 @@ def main_entry(ssl_cert=None):
     if ssl_cert:
         import ssl
         print "CERT_PATH: " + ssl_cert
-        ssl._https_verify_certificates(enable=True)
-        options = ssl.create_default_context(capath=ssl_cert)
+        #ssl._https_verify_certificates(enable=True)
+        options = ssl._create_unverified_context()
     runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
     try:
