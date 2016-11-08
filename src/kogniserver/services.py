@@ -151,6 +151,7 @@ class SessionHandler(object):
     def register_scope(self, rsb_scope, message_type):
         logging.info("trying to register on scope %s with message type %s" %
                      (rsb_scope, message_type))
+        return "JUUUUUUHUUUU"
 
         if rsb_scope not in self.scopes:
             b = Bridge(rsb_scope, self.rsb_conf, self.wamp_session, message_type)
