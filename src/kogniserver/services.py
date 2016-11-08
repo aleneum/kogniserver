@@ -155,7 +155,9 @@ class SessionHandler(object):
         if rsb_scope not in self.scopes:
             b = Bridge(rsb_scope, self.rsb_conf, self.wamp_session, message_type)
             self.scopes[rsb_scope] = b
+            logging.debug('Scope %s has been registered' % self.wamp_scope)
             return "Scope registered"
+        logging.debug('Scope %s exists' % self.wamp_scope)
         return "Scope already exists"
 
     def quit(self):
