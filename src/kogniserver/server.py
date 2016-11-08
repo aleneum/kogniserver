@@ -72,7 +72,7 @@ def main_entry(ssl_cert=None):
     options = None
     if ssl_cert:
         import ssl
-        options = ssl.create_default_context(cadata=open(ssl_cert, 'r').read())
+        options = ssl.create_default_context(capath=ssl_cert)
     runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
     try:
