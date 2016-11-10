@@ -101,7 +101,7 @@ class Bridge(object):
         logging.debug('Received wamp message on %s' % self.wamp_scope)
         self.wamp_callback(event)
 
-    def shutdown(self):
+    def deactivate(self):
         logging.info("Shutting down bridge...")
         if self.rsb_listener:
             self.rsb_listener.deactivate()
@@ -156,7 +156,13 @@ class SessionHandler(object):
         logging.debug('Scope %s exists' % rsb_scope)
         return "Scope already exists"
 
+    # This will only work for primitive types!
+    def call_rpc(self, rsb_scope, method, payload):
+        if rsb_scope not in self.scopes:
+            self.scopes[rsb_scope] = rsb.createRemoteServer(rsb_scope, config=self.rsb_conf)
+        return getattr(self.scopes[rsb_scope], method)(payload)
+
     def quit(self):
         logging.info("quitting session...")
         for bridge in self.scopes.values():
-            bridge.shutdown()
+            bridge.deactivate()

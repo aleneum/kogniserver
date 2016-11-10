@@ -11,7 +11,7 @@ class TestKogniServerBridge(TestCase):
         self.config = create_rsb_config()
 
     def tearDown(self):
-        self.b.shutdown()
+        self.b.deactivate()
 
     #def __init__(self, rsb_scope, rsb_config, wamp, message_type, mode=BIDIRECTIONAL, wamp_scope=None):
 

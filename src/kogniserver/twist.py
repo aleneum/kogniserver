@@ -9,6 +9,7 @@ from autobahn.twisted.wamp import ApplicationSession
 
 from services import SessionHandler
 
+
 class Ping(Thread):
     def __init__(self, wamp):
         Thread.__init__(self)
@@ -44,6 +45,7 @@ class Component(ApplicationSession):
 
         # register RPC
         reg = yield self.register(self.session.register_scope, 'service.displayserver.register')
+        rpc = yield self.register(self.session.call_rpc, 'service.displayserver.call')
 
         # setup ping
         sub = yield self.subscribe(self.on_ping, "com.wamp.ping")

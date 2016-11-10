@@ -150,3 +150,31 @@ class TestKogniServerSessionHandler(TestCase):
                     informer.publishData(v)
                 self.lock.acquire()
         self.assertTrue(self.passed.called)
+
+    def test_rpc(self):
+
+        def echo(x):
+            return x
+
+        def squared(x):
+            return x*x
+
+        with rsb.createLocalServer('/test/rpc') as server:
+            server.addMethod('echo', echo, str, str)
+            server.addMethod('squared', squared, int, int)
+            res = self.session.call_rpc('/test/rpc', 'echo', "foo")
+            self.assertEqual(res, "foo")
+            res = self.session.call_rpc('/test/rpc', 'squared', 5)
+            self.assertEqual(res, 25)
+
+    # Future Feature
+    # def test_rst_rpc(self):
+    #     def echo_type(val):
+    #
+    #     with rsb.createLocalServer('/test/rpc') as server:
+    #         server.addMethod('echo', echo_type, Value, int)
+    #         v = Value()
+    #         v.type = Value.STRING
+    #         v.string = "foo"
+    #         res = self.session.call_rpc('/test/rpc', 'echo', v)
+    #         self.assertEqual(res, 4)
