@@ -84,13 +84,12 @@ def main_entry(ssl_cert=None):
         )
     runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
-    run = True
 
-    while run:
+    while True:
         try:
             runner.run(Component)
         except KeyboardInterrupt:
-            run = False
+            break
         except Exception as e:
             print("Application Error: ", e)
 
