@@ -56,7 +56,8 @@ class Component(ApplicationSession):
         print 'kogniserver(twisted) started...'
 
     def onLeave(self, details):
-        print('Leave Reason:', repr(details))
+        print('Leave Reason:', details.reason)
+        print('Leave Message:', details.message)
         self.ping.running = False
         while self.ping.isAlive():
             sleep(0.1)
@@ -83,15 +84,14 @@ def main_entry(ssl_cert=None):
         options = CertificateOptions(
             trustRoot=OpenSSLCertificateAuthorities([cert]),
         )
-    runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
+    runner = ApplicationRunner(url=u"{0}://localhost:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
 
-    while True:
-        try:
-            runner.run(Component)
-        except Exception as e:
-            print ("Exit App Reason: ", e)
-            break
+    try:
+        runner.run(Component)
+    except Exception as e:
+        print ("Exit App Reason: ", e)
+        raise KeyboardInterrupt
 
 if __name__ == '__main__':
     main_entry()
