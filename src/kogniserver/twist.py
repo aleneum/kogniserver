@@ -89,10 +89,9 @@ def main_entry(ssl_cert=None):
     while True:
         try:
             runner.run(Component)
-        except KeyboardInterrupt:
-            break
         except Exception as e:
-            print("Application Error: ", e)
+            print ("Exit App Reason: ", e)
+            break
 
 if __name__ == '__main__':
     main_entry()
