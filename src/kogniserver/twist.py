@@ -91,7 +91,6 @@ def main_entry(ssl_cert=None):
             runner.run(Component)
         except KeyboardInterrupt:
             run = False
-            raise KeyboardInterrupt
         except Exception as e:
             print("Application Error: ", e)
 
