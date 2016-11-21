@@ -88,6 +88,7 @@ def main_entry(ssl_cert=None):
     while True:
         try:
             runner.run(Component)
+            print("Component stopped blocking...")
         except KeyboardInterrupt:
             break
         except Exception as e:
