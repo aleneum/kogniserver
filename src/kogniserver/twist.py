@@ -88,7 +88,7 @@ def main_entry(ssl_cert=None):
                                realm=u"realm1", ssl=options)
 
     try:
-        runner.run(Component)
+        runner.run(Component, auto_reconnect=True)
     except Exception as e:
         print ("Exit App Reason: ", e)
         raise KeyboardInterrupt
