@@ -5,7 +5,7 @@ import copy
 import rsb
 from rsb.converter import PredicateConverterList, Converter
 from rsb import Event
-
+from threading import Lock
 
 class Forwarder(Converter):
     def __init__(self):
@@ -145,19 +145,23 @@ class SessionHandler(object):
 
         self.wamp_session = wamp_session
         self.scopes = {}
+        self.lock = Lock()
         self.rsb_conf = create_rsb_config()
 
     def register_scope(self, rsb_scope, message_type):
         logging.info("trying to register on scope %s with message type %s" %
                      (rsb_scope, message_type))
 
-        if rsb_scope not in self.scopes:
-            b = Bridge(rsb_scope, self.rsb_conf, self.wamp_session, message_type)
-            self.scopes[rsb_scope] = b
-            logging.debug('Scope %s has been registered' % rsb_scope)
-            return "Scope registered"
-        logging.debug('Scope %s exists' % rsb_scope)
-        return "Scope already exists"
+        with self.lock:
+            if rsb_scope not in self.scopes:
+                b = Bridge(rsb_scope, self.rsb_conf, self.wamp_session, message_type)
+                self.scopes[rsb_scope] = b
+                logging.debug('Scope %s has been registered' % rsb_scope)
+                msg = "Scope registered"
+            else:
+                logging.debug('Scope %s exists' % rsb_scope)
+                msg = "Scope already exists"
+        return msg
 
     # This will only work for primitive types!
     def call_rpc(self, rsb_scope, method, payload):
