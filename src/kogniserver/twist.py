@@ -56,6 +56,7 @@ class Component(ApplicationSession):
         print 'kogniserver(twisted) started...'
 
     def onLeave(self, details):
+        print('Leave Reason:', details)
         self.ping.running = False
         while self.ping.isAlive():
             sleep(0.1)
@@ -88,7 +89,6 @@ def main_entry(ssl_cert=None):
     while True:
         try:
             runner.run(Component)
-            print("Component stopped blocking...")
         except KeyboardInterrupt:
             break
         except Exception as e:
