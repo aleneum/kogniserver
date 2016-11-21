@@ -56,7 +56,7 @@ class Component(ApplicationSession):
         print 'kogniserver(twisted) started...'
 
     def onLeave(self, details):
-        print('Leave Reason:', details)
+        print('Leave Reason:', repr(details))
         self.ping.running = False
         while self.ping.isAlive():
             sleep(0.1)

@@ -69,7 +69,7 @@ class Bridge(object):
             msg = '\0' + base64.b64encode(event.data[1]).decode('ascii')
             self.wamp.publish(self.wamp_scope, msg)
         except Exception as e:
-            logging.error("Error while receiving rst data:", e)
+            logging.error("Error while receiving rst data: %s" % str(e))
 
     def on_primitive_message(self, event):
         if 'wamp' in event.metaData.userInfos:
@@ -80,7 +80,7 @@ class Bridge(object):
         try:
             self.wamp.publish(self.wamp_scope, self.rsb_type(event.data))
         except Exception as e:
-            logging.error("Error while receiving primitive data:", e)
+            logging.error("Error while receiving primitive data: %s" % str(e))
 
     def send_rst(self, data):
         try:
