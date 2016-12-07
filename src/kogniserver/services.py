@@ -6,6 +6,8 @@ import rsb
 from rsb.converter import PredicateConverterList, Converter
 from rsb import Event
 from threading import Lock
+from numbers import Integral, Real
+
 
 class Forwarder(Converter):
     def __init__(self):
@@ -56,8 +58,7 @@ class Bridge(object):
         if mode > 1:
             logging.info('listening on wamp scope %s' % self.wamp_scope)
             self.wamp_listener = self.wamp.subscribe(self.on_wamp_message, self.wamp_scope)
-            self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config,
-                                                    dataType=self.rsb_type)
+            self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config)
 
     def on_bytearray_message(self, event):
         if 'wamp' in event.metaData.userInfos:
@@ -113,6 +114,15 @@ class Bridge(object):
             self.rsb_publisher.deactivate()
 
 
+def get_mapping(ob):
+    if isinstance(ob, rsb.converter.DoubleConverter):
+        return lambda data_type: issubclass(data_type, Real) and not issubclass(data_type, Integral)
+    elif isinstance(ob, rsb.converter.Int64Converter):
+        return lambda data_type: issubclass(data_type, Integral) and not issubclass(data_type, bool)
+    else:
+        return lambda data_type, d_type=ob.getDataType(): data_type == d_type
+
+
 def create_rsb_config():
     rsb_conf = copy.deepcopy(rsb.getDefaultParticipantConfig())
     trans = rsb_conf.getTransports()
@@ -122,17 +132,16 @@ def create_rsb_config():
     conv = Forwarder()
     conv_list = PredicateConverterList(bytearray)
     conv_list.addConverter(conv,
-                           dataTypePredicate=lambda data_type: issubclass(data_type, tuple),
+                           dataTypePredicate=lambda data_type: data_type == tuple,
                            wireSchemaPredicate=lambda wire_schema: wire_schema.startswith('.'))
 
     for t in trans:
         convs = rsb.convertersFromTransportConfig(t)
         for c in convs.getConverters().values():
-            conv_list.addConverter(c,
-                                   dataTypePredicate=lambda data_type, d_type=c.getDataType(): issubclass(data_type, d_type))
+            conv_list.addConverter(c, dataTypePredicate=get_mapping(c))
+
         c = rsb.converter.StringConverter()
-        conv_list.addConverter(c,
-                               dataTypePredicate=lambda data_type, d_type=c.getDataType(): issubclass(data_type, d_type))
+        conv_list.addConverter(c, get_mapping(c))
         t.converters = conv_list
     return rsb_conf
 

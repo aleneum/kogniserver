@@ -11,22 +11,18 @@ import base64
 import threading
 
 
-def send_primitive(session, data, type):
-    passed = MagicMock()
+def send_primitive(test, session, data, type):
 
-    def message_received(passed, event):
+    def message_received(event):
         print event.data
-        if event.data == data:
-            passed()
-
-    func = partial(message_received, passed)
+        test.assertTrue(event.data, data)
+        test.assertTrue(type(event.data), type(data))
 
     with rsb.createListener('/test/scope') as listener:
-        listener.addHandler(func)
+        listener.addHandler(message_received)
         session.register_scope('/test/scope', type)
         session.scopes['/test/scope'].send_primitive_data(data)
         time.sleep(0.1)
-    return passed.called
 
 
 class TestKogniServerSessionHandler(TestCase):
@@ -64,16 +60,16 @@ class TestKogniServerSessionHandler(TestCase):
                         "Scope already exists")
 
     def test_send_string(self):
-        res = send_primitive(self.session, 'Hello', 'string')
-        self.assertTrue(res)
+        send_primitive(self, self.session, 'Hello', 'string')
+
+    def test_send_bool(self):
+        send_primitive(self, self.session, True, 'bool')
 
     def test_send_float(self):
-        res = send_primitive(self.session, 1.0, 'float')
-        self.assertTrue(res)
+        send_primitive(self, self.session, 1.0, 'float')
 
     def test_send_int(self):
-        res = send_primitive(self.session, 1, 'integer')
-        self.assertTrue(res)
+        send_primitive(self, self.session, 1, 'integer')
 
     def test_send_protobuf_raw(self):
         def raw_received(passed, lock, event):

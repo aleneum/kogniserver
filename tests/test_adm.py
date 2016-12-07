@@ -38,7 +38,11 @@ class TestKogniServerAdm(TestCase):
     def setUpClass(cls):
         super(TestKogniServerAdm, cls).setUpClass()
         if not exists('./server.crt'):
-            subprocess.call(['./tests/create-self-signed-cert.sh'])
+            test_path = './create-self-signed-cert.sh'
+            if exists(test_path):
+                subprocess.call([test_path])
+            else:
+                subprocess.call(['./tests/' + test_path])
 
     def setUp(self):
         if exists('./config.test.json'):
