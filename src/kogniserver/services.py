@@ -128,6 +128,8 @@ def create_rsb_config():
     for t in trans:
         convs = rsb.convertersFromTransportConfig(t)
         for c in convs.getConverters().values():
+            print c.getDataType()
+            print issubclass(c.getDataType(), bool)
             conv_list.addConverter(c,
                                    dataTypePredicate=lambda data_type, d_type=c.getDataType(): issubclass(data_type, d_type))
         c = rsb.converter.StringConverter()
