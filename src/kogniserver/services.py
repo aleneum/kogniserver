@@ -96,6 +96,7 @@ class Bridge(object):
     def send_primitive_data(self, data):
         try:
             logging.info("send primitive message [%s] message to %s" % (unicode(data), self.rsb_scope))
+            logging.info("with type %s and casted as %s " % (self.rsb_type, str(self.rsb_type(data))))
             self.rsb_publisher.publishData(self.rsb_type(data), userInfos={'wamp': ''})
         except Exception as e:
             logging.error("Error while sending primitive data: %s" % str(e))
