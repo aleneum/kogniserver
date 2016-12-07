@@ -56,7 +56,8 @@ class Bridge(object):
         if mode > 1:
             logging.info('listening on wamp scope %s' % self.wamp_scope)
             self.wamp_listener = self.wamp.subscribe(self.on_wamp_message, self.wamp_scope)
-            self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config)
+            self.rsb_publisher = rsb.createInformer(self.rsb_scope, config=rsb_config,
+                                                    dataType=self.rsb_type)
 
     def on_bytearray_message(self, event):
         if 'wamp' in event.metaData.userInfos:
@@ -96,7 +97,6 @@ class Bridge(object):
     def send_primitive_data(self, data):
         try:
             logging.info("send primitive message [%s] message to %s" % (unicode(data), self.rsb_scope))
-            logging.info("with type %s and casted as %s " % (self.rsb_type, str(self.rsb_type(data))))
             self.rsb_publisher.publishData(self.rsb_type(data), userInfos={'wamp': ''})
         except Exception as e:
             logging.error("Error while sending primitive data: %s" % str(e))
@@ -128,8 +128,6 @@ def create_rsb_config():
     for t in trans:
         convs = rsb.convertersFromTransportConfig(t)
         for c in convs.getConverters().values():
-            print c.getDataType()
-            print issubclass(c.getDataType(), bool)
             conv_list.addConverter(c,
                                    dataTypePredicate=lambda data_type, d_type=c.getDataType(): issubclass(data_type, d_type))
         c = rsb.converter.StringConverter()
