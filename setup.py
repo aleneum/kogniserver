@@ -6,7 +6,7 @@ import json
 
 setup(
     name='kogniserver',
-    version='0.1.5',
+    version='0.2.0',
     maintainer='Alexander Neumann',
     maintainer_email='aleneum@gmail.com',
     url='http://github.com/aleneum/kogniserver',
@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     tests_require=['nose>=1.3', 'coverage'],
-    install_requires=['txaio', 'pyasn1', 'autobahn', 'crossbar', 'trollius', 'rsb-python'],
+    install_requires=['txaio', 'pyasn1', 'crossbar', 'autobahn', 'trollius', 'rsb-python'],
     entry_points={
         "console_scripts": [
             "kogniserver = kogniserver.adm:main_entry",

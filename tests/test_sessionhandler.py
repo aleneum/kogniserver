@@ -158,19 +158,42 @@ class TestKogniServerSessionHandler(TestCase):
         with rsb.createLocalServer('/test/rpc') as server:
             server.addMethod('echo', echo, str, str)
             server.addMethod('squared', squared, int, int)
-            res = self.session.call_rpc('/test/rpc', 'echo', "foo")
+            res = self.session.call_rpc('/test/rpc', 'echo', "foo", 'string', 'string')
             self.assertEqual(res, "foo")
-            res = self.session.call_rpc('/test/rpc', 'squared', 5)
+            res = self.session.call_rpc('/test/rpc', 'squared', 5,  'string', 'integer')
             self.assertEqual(res, 25)
 
-    # Future Feature
-    # def test_rst_rpc(self):
-    #     def echo_type(val):
-    #
-    #     with rsb.createLocalServer('/test/rpc') as server:
-    #         server.addMethod('echo', echo_type, Value, int)
-    #         v = Value()
-    #         v.type = Value.STRING
-    #         v.string = "foo"
-    #         res = self.session.call_rpc('/test/rpc', 'echo', v)
-    #         self.assertEqual(res, 4)
+    def test_rpc_protobuf(self):
+
+        def echo(value):
+            value.string = "received"
+            return value
+
+        def raw_received(session, event):
+            msg = '\0' + base64.b64encode(event.data[1]).decode('ascii')
+            res = session.call_rpc('/test/rpc', 'echo',  msg, 'rst.generic.Value', 'rst.generic.Value')
+            session.scopes['/test/out'].on_wamp_message(res)
+
+        def protobuf_received(passed, lock, event):
+            if hasattr(event.data, 'type') and event.data.string == 'received':
+                passed()
+            lock.release()
+
+        rsb.converter.registerGlobalConverter(
+            rsb.converter.ProtocolBufferConverter(messageClass=Value), True)
+        self.session.register_scope('/test/scope', 'rst.generic.Value')
+        self.session.register_scope('/test/out', 'rst.generic.Value')
+        with rsb.createLocalServer('/test/rpc') as server:
+            server.addMethod('echo', echo, Value, Value)
+            with rsb.createListener('/test/scope', config=self.session.rsb_conf) as listener:
+                listener.addHandler(partial(raw_received, self.session))
+                with rsb.createListener('/test/out') as out:
+                    out.addHandler(partial(protobuf_received, self.passed, self.lock))
+                    with rsb.createInformer('/test/scope', dataType=Value) as informer:
+                        v = Value()
+                        v.type = Value.STRING
+                        v.string = "hello"
+                        informer.publishData(v)
+                        self.lock.acquire()
+        self.assertTrue(self.passed.called)
+
