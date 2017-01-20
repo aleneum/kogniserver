@@ -1,15 +1,10 @@
 from unittest import TestCase
-from kogniserver.client import main_entry, Client
-from kogniserver.adm import main_entry as admin_main
+from kogniserver.client import main_entry
 from kogniserver.adm import check_server
-from mock import MagicMock
 import threading
 import subprocess
 import time
 import thread
-
-from os.path import exists
-from os import remove
 
 
 def terminate():

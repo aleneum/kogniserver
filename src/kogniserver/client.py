@@ -4,7 +4,8 @@ import argparse
 import sys
 from functools import partial
 
-from .services import Bridge, create_rsb_config
+from .services import create_rsb_config
+from .pubsub import PubSubBridge
 
 # try:
 #     import asyncio
@@ -34,7 +35,7 @@ class Client(ApplicationSession):
         logging.basicConfig()
         logging.getLogger().setLevel(log_level)
         for mapping in self._scopes:
-            self.bridges.append(Bridge(**self.parse_mapping(mapping)))
+            self.bridges.append(PubSubBridge(**self.parse_mapping(mapping)))
         print 'client(twisted) connected...'
 
     def parse_mapping(self, mapping):
@@ -42,9 +43,9 @@ class Client(ApplicationSession):
         destination = None if '*' in destination else destination
         d = 0
         if direction.startswith('<'):
-            d += Bridge.WAMP_TO_RSB
+            d += PubSubBridge.WAMP_TO_RSB
         if direction.endswith('>'):
-            d += Bridge.RSB_TO_WAMP
+            d += PubSubBridge.RSB_TO_WAMP
 
         message_type = direction.translate(None, '<->')
         return {'rsb_scope': source, 'rsb_config': self.config, 'wamp': self, 'message_type': message_type,
