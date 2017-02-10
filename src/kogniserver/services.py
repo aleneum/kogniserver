@@ -85,6 +85,7 @@ class SessionHandler(object):
             self.scopes[rsb_scope] = RPCBridge(rsb_scope, self.rsb_conf)
         if method not in self.scopes[rsb_scope].converters:
             self.scopes[rsb_scope].add_method(method, type_in, type_out)
+        logging.info("calling {0} on server {1}".format(method, rsb_scope))
         return self.scopes[rsb_scope].call(method, payload)
 
     def quit(self):

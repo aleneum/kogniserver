@@ -75,7 +75,7 @@ class RPCBridge(object):
             raise ValueError('Method {0} not known.'.format(name))
         method = getattr(self.remote, name)
         converter = self.converters[name]
-        res = method(converter.parse(payload))
+        res = method.async(converter.parse(payload)).get(timeout=5)
         return converter.prepare(res)
 
     def deactivate(self):
