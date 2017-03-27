@@ -1,0 +1,4 @@
+six
+autobahn==0.17.2
+crossbar==17.2.1
+rsb-python
