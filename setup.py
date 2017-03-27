@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     tests_require=['nose>=1.3', 'coverage'],
-    install_requires=['crossbar >=17, <18', 'autobahn >=0.17, <0.18', 'trollius', 'rsb-python'],
+    install_requires=['crossbar >=16, <17', 'autobahn >=0.16, <0.17', 'trollius', 'rsb-python'],
     entry_points={
         "console_scripts": [
             "kogniserver = kogniserver.adm:main_entry",

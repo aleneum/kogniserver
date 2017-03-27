@@ -1,4 +1,4 @@
 six
-autobahn==0.17.2
-crossbar==17.2.1
+autobahn<0.17
+crossbar<17.0
 rsb-python
