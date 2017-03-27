@@ -57,7 +57,7 @@ class PubSubBridge(object):
             msg = '\0' + base64.b64encode(event.data[1]).decode('ascii')
             self.wamp.publish(self.wamp_scope, msg)
         except Exception as e:
-            logger.error("Error while receiving rst data: %s", e)
+            logger.error("Error while receiving rst data: %s", repr(e))
 
     def on_primitive_message(self, event):
         if 'wamp' in event.metaData.userInfos:
@@ -79,7 +79,7 @@ class PubSubBridge(object):
                           userInfos={'wamp': ''})
             self.rsb_publisher.publishEvent(event)
         except Exception as e:
-            logger.error("Error while sending rst data: %s", e)
+            logger.error("Error while sending rst data: %s", repr(e))
 
     def send_primitive_data(self, data):
         try:
