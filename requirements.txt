@@ -2,3 +2,5 @@ six
 autobahn<0.17
 crossbar<17.0
 rsb-python
+trollius
+
