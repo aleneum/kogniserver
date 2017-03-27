@@ -3,6 +3,8 @@ import base64
 import rsb
 from rsb import Event
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class RPCConverter(object):
 
@@ -32,13 +34,13 @@ class RPCConverter(object):
             msg = '\0' + base64.b64encode(event.data[1]).decode('ascii')
             return msg
         except Exception as e:
-            logging.error("Error while receiving rst data: %s" % str(e))
+            logger.error("Error while receiving rst data: %s" % str(e))
 
     def prepare_primitive(self, event):
         try:
             return self.type_out(event.data)
         except Exception as e:
-            logging.error("Error while receiving primitive data: %s" % str(e))
+            logger.error("Error while receiving primitive data: %s" % str(e))
 
     def parse_bytearray(self, data):
         try:
@@ -47,7 +49,7 @@ class RPCConverter(object):
                           data=(self.type_in, binary_data), type=tuple)
             return event
         except Exception as e:
-            logging.error("Error while sending rst data: %s" % str(e))
+            logger.error("Error while sending rst data: %s" % str(e))
 
     def parse_primitive(self, data):
         try:
@@ -55,7 +57,7 @@ class RPCConverter(object):
             event = Event(scope=self.scope, data=payload, type=type(payload))
             return event
         except Exception as e:
-            logging.error("Error while sending primitive data: %s" % str(e))
+            logger.error("Error while sending primitive data: %s" % str(e))
 
 
 class RPCBridge(object):
@@ -79,5 +81,5 @@ class RPCBridge(object):
         return converter.prepare(res)
 
     def deactivate(self):
-        logging.info("Shutting down rpc...")
+        logger.info("Shutting down rpc...")
         self.remote.deactivate()
