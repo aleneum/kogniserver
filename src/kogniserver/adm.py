@@ -9,7 +9,6 @@ import threading
 import socket
 import sys
 
-from .twist import main_entry as async_main
 
 
 def run_crossbar(config_path, keep_alive):
@@ -112,7 +111,12 @@ def main_entry(args=None):
         ssl_cert = None
         if 'tls' in j['workers'][0]['transports'][0]['endpoint']:
             ssl_cert = j['workers'][0]['transports'][0]['endpoint']['tls']['certificate']
-    async_main(ssl_cert)
+    if ssl_cert is not None:
+        from .twist import main_entry as twisted_main
+        twisted_main(ssl_cert)
+    else:
+        from .async import main_entry as async_main
+        async_main()
 
 
 def check_server(address, port):

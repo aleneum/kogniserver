@@ -38,7 +38,6 @@ class Component(ApplicationSession):
 
     @asyncio.coroutine
     def onJoin(self, details):
-        # init members
         if os.environ.get('DEBUG') in ['1','True','true','TRUE']:
             log_level = logging.DEBUG
         else:
@@ -49,6 +48,7 @@ class Component(ApplicationSession):
 
         # register RPC
         reg = yield self.register(self.session.register_scope, 'service.displayserver.register')
+        rpc = yield self.register(self.session.call_rpc, 'service.displayserver.call')
 
         # setup ping
         sub = yield self.subscribe(self.on_ping, "com.wamp.ping")
@@ -71,9 +71,7 @@ def main_entry(ssl_cert=None):
     proto = "wss" if ssl_cert else "ws"
     options = None
     if ssl_cert:
-        import ssl
-        print "CERT_PATH: " + ssl_cert
-        options = ssl._create_unverified_context()
+        raise AttributeError("asyncio backend does not support ssl")
     runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
     try:
