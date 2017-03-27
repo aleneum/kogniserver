@@ -71,7 +71,7 @@ def main_entry(ssl_cert=None):
     proto = "wss" if ssl_cert else "ws"
     options = None
     if ssl_cert:
-        raise AttributeError("asyncio backend does not support ssl")
+        raise RuntimeError("asyncio backend does not support ssl")
     runner = ApplicationRunner(url=u"{0}://127.0.0.1:8181/ws".format(proto),
                                realm=u"realm1", ssl=options)
     try:

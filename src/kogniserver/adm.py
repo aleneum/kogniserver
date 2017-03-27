@@ -111,12 +111,13 @@ def main_entry(args=None):
         ssl_cert = None
         if 'tls' in j['workers'][0]['transports'][0]['endpoint']:
             ssl_cert = j['workers'][0]['transports'][0]['endpoint']['tls']['certificate']
-    if ssl_cert is not None:
+    try:
+        from .async import main_entry as async_main
+        async_main(ssl_cert)
+    except RuntimeError:
+        # will be used if a) twisted has been used before or if an ssl_cert should be used
         from .twist import main_entry as twisted_main
         twisted_main(ssl_cert)
-    else:
-        from .async import main_entry as async_main
-        async_main()
 
 
 def check_server(address, port):
