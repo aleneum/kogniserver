@@ -24,10 +24,10 @@ class RPCConverter(object):
 
         if type_out in RPCBridge.basic_types:
             self.prepare = self.prepare_primitive
-            self.type_out = RPCBridge.basic_types[type_in]
+            self.type_out = RPCBridge.basic_types[type_out]
         else:
             self.prepare = self.prepare_bytearray
-            self.type_out = str('.' + type_in)
+            self.type_out = str('.' + type_out)
 
     def prepare_bytearray(self, event):
         try:
