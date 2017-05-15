@@ -2,6 +2,7 @@ import logging
 import base64
 import rsb
 from rsb import Event
+from six import string_types
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -63,7 +64,8 @@ class PubSubBridge(object):
         if 'wamp' in event.metaData.userInfos:
             logging.debug("received OWN rsb primitive on %s, skipping..." % self.rsb_scope)
             return
-        logger.info("received primitive message [%s] on scope %s" % (event.data.decode("utf8"), self.rsb_scope))
+        msg = event.data.decode("utf8") if isinstance(event.data, string_types) else event.data
+        logger.info("received primitive message [%s] on scope %s" % (msg, self.rsb_scope))
         logger.debug("sent to %s" % self.wamp_scope)
         try:
             self.wamp.publish(self.wamp_scope, self.rsb_type(event.data))
