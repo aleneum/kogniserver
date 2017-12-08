@@ -112,6 +112,9 @@ def main_entry(args=None):
         if 'tls' in j['workers'][0]['transports'][0]['endpoint']:
             ssl_cert = j['workers'][0]['transports'][0]['endpoint']['tls']['certificate']
     try:
+        # async cannot deal with ssl yet and importing the runner
+        # already sets the environment to asyncio
+        if ssl_cert: raise RuntimeError
         from .async import main_entry as async_main
         async_main(ssl_cert)
     except RuntimeError:
