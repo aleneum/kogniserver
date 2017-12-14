@@ -17,7 +17,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     tests_require=['nose>=1.3', 'coverage'],
-    install_requires=['crossbar >=16, <17', 'autobahn >=0.16, <0.17', 'trollius', 'rsb-python'],
+    # pyasn and following are some requirements of autobahn
+    install_requires=['crossbar >=16, <17', 'autobahn >=0.16, <0.17',
+                      'trollius', 'rsb-python', 'pyasn1 <0.5.0, >=0.4.1',
+                      'idna <2.7, >=2.5', 'numpy','scipy'],
     entry_points={
         "console_scripts": [
             "kogniserver = kogniserver.adm:main_entry",
