@@ -7,6 +7,7 @@ from six import string_types
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class PubSubBridge(object):
     basic_types = {'integer': int, 'float': float, 'string': lambda s: s, 'bool': bool}
     RSB_TO_WAMP = 1
@@ -85,7 +86,7 @@ class PubSubBridge(object):
 
     def send_primitive_data(self, data):
         try:
-            logger.info("send primitive message [%s] message to %s" % (unicode(data), self.rsb_scope))
+            logger.info("send primitive message [%s] to %s" % (unicode(data), self.rsb_scope))
             self.rsb_publisher.publishData(self.rsb_type(data), userInfos={'wamp': ''})
         except Exception as e:
             logger.error("Error while sending primitive data: %s" % str(e))

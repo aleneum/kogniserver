@@ -33,8 +33,6 @@ def get_mapping(ob):
 def create_rsb_config():
     rsb_conf = copy.deepcopy(rsb.getDefaultParticipantConfig())
     trans = rsb_conf.getTransports()
-    for t in trans:
-        convs = rsb.convertersFromTransportConfig(t)
 
     conv = Forwarder()
     conv_list = PredicateConverterList(bytearray)
