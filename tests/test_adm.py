@@ -12,7 +12,7 @@ from os import remove
 
 def terminate():
     while not check_server('localhost', 8181):
-        time.sleep(0.5)
+        time.sleep(1)
     subprocess.call(['crossbar', 'stop'])
     time.sleep(2)
     thread.interrupt_main()
@@ -21,7 +21,7 @@ def terminate():
 def run_crossbar(args):
     t = threading.Thread(target=terminate)
     t.start()
-    with mock.patch('__builtin__.raw_input',  side_effect=['', '.', '']):
+    with mock.patch('__builtin__.raw_input',  side_effect=[False, False, False, False, False]):
         main_entry(args)
 
 

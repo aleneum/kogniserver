@@ -43,6 +43,8 @@ def main_entry(args=None):
     config_path = join(prefix, 'etc/crossbar/config.json') if not args.config else args.config
 
     choice = 'n'
+    input_valid = True
+
     if exists(config_path) is False:
         input_valid = False if not args.generate else True
         while not input_valid:
@@ -52,27 +54,27 @@ def main_entry(args=None):
             else:
                 input_valid = True
 
-    input_valid = False
-    while not input_valid:
-      serve_path = raw_input("Please enter the directory from which files should be served [%s]:" % serve_path) or serve_path
-      if not exists(serve_path):
-        choice = raw_input("%s does not exist. Should it be created? [y]/n: " % serve_path) or 'y'
-        if choice not in ['y', 'n']:
-            print("please enter 'y' or 'n'.")
-        elif choice == 'y':
-            makedirs(serve_path)
-            input_valid = True
-      else:
-        input_valid = True
-
     if choice in 'y' or args.force:
+        input_valid = False if not args.generate else True
+        while not input_valid:
+          serve_path = raw_input("Please enter the directory from which files should be served [%s]:" % serve_path) or serve_path
+          if not exists(serve_path):
+            choice = raw_input("%s does not exist. Should it be created? [y]/n: " % serve_path) or 'y'
+            if choice not in ['y', 'n']:
+                print("please enter 'y' or 'n'.")
+            elif choice == 'y':
+                makedirs(serve_path)
+                input_valid = True
+          else:
+            input_valid = True
+
         protopath = join(prefix, 'share/rst0.17/proto')
         input_valid = False if not args.generate else True
         while not input_valid:
             protopath = raw_input("Location of proto-files? [%s]:" % protopath) or protopath
             if not exists(protopath) and not args.generate:
                 print("%s does not exist!" % protopath)
-                choice = raw_input("Do you want to ommit RST in your configuration? y/[n]:") or 'n'
+                choice = raw_input("Do you want to ommit RST in your configuration? [y]/n:") or 'y'
                 if choice not in ['y', 'n']:
                   print("please enter 'y' or 'n'.")
                 if choice =='y':
