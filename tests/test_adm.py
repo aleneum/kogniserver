@@ -21,7 +21,7 @@ def terminate():
 def run_crossbar(args):
     t = threading.Thread(target=terminate)
     t.start()
-    with mock.patch('__builtin__.raw_input',  side_effect=[False, False, False, False, False]):
+    with mock.patch('__builtin__.raw_input',  return_value=False):
         main_entry(args)
 
 
