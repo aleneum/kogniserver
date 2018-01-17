@@ -73,8 +73,8 @@ def main_entry(args=None):
         while not input_valid:
             protopath = raw_input("Location of proto-files? [%s]:" % protopath) or protopath
             if not exists(protopath) and not args.generate:
-                print("%s does not exist!" % protopath)
-                choice = raw_input("Do you want to ommit RST in your configuration? [y]/n:") or 'y'
+                choice = raw_input("%s does not exist! "
+                                   "Do you want to ommit RST in your configuration? [y]/n:" % protopath) or 'y'
                 if choice not in ['y', 'n']:
                   print("please enter 'y' or 'n'.")
                 if choice =='y':

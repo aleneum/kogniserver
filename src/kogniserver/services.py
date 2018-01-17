@@ -9,6 +9,7 @@ from numbers import Integral, Real
 from .pubsub import PubSubBridge
 from .rpc import RPCBridge
 
+
 class Forwarder(Converter):
     def __init__(self):
         super(Forwarder, self).__init__(bytearray, tuple, '.*')
