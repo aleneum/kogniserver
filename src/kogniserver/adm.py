@@ -135,13 +135,13 @@ def main_entry(args=None):
     try:
         # async cannot deal with ssl yet and importing the runner
         # already sets the environment to asyncio
-        if ssl_cert: raise RuntimeError
-        from .async import main_entry as async_main
-        async_main(ssl_cert)
+        if ssl_cert:
+            raise RuntimeError
+        from .async import main_entry as server_main_entry
     except RuntimeError:
         # will be used if a) twisted has been used before or if an ssl_cert should be used
-        from .twist import main_entry as twisted_main
-        twisted_main(ssl_cert)
+        from .twist import main_entry as server_main_entry
+    server_main_entry(ssl_cert)
 
 
 def check_server(address, port):

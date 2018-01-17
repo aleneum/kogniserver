@@ -11,16 +11,15 @@ import base64
 import threading
 
 
-def send_primitive(test, session, data, type):
+def send_primitive(test, session, data, data_type):
 
     def message_received(event):
-        print event.data
         test.assertTrue(event.data, data)
         test.assertTrue(type(event.data), type(data))
 
     with rsb.createListener('/test/scope') as listener:
         listener.addHandler(message_received)
-        session.register_scope('/test/scope', type)
+        session.register_scope('/test/scope', data_type)
         session.scopes['/test/scope'].send_primitive_data(data)
         time.sleep(0.1)
 
