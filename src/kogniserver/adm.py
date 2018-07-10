@@ -1,6 +1,6 @@
 import argparse
 from os import makedirs
-from os.path import abspath, exists, join, dirname
+from os.path import abspath, exists, join, dirname, expanduser
 import re
 import subprocess
 import time
@@ -8,7 +8,6 @@ import json
 import threading
 import socket
 import sys
-
 
 
 def run_crossbar(config_path, keep_alive):
@@ -43,12 +42,12 @@ def main_entry(args=None):
     config_path = join(prefix, 'etc/crossbar/config.json') if not args.config else args.config
 
     choice = 'n'
-    input_valid = True
 
     if exists(config_path) is False:
         input_valid = False if not args.generate else True
         while not input_valid:
-            choice = raw_input("config.json for crossbar does not exists. Should a default one be created? [y]/n:") or 'y'
+            choice = raw_input("config.json for crossbar does not exists. "
+                               "Should a default one be created? [y]/n:") or 'y'
             if choice not in ['y', 'n']:
                 print("please enter 'y' or 'n'.")
             else:
@@ -57,16 +56,18 @@ def main_entry(args=None):
     if choice in 'y' or args.force:
         input_valid = False if not args.generate else True
         while not input_valid:
-          serve_path = raw_input("Please enter the directory from which files should be served [%s]:" % serve_path) or serve_path
-          if not exists(serve_path):
-            choice = raw_input("%s does not exist. Should it be created? [y]/n: " % serve_path) or 'y'
-            if choice not in ['y', 'n']:
-                print("please enter 'y' or 'n'.")
-            elif choice == 'y':
-                makedirs(serve_path)
+            serve_path = raw_input("Please enter the directory from which "
+                                   "files should be served [%s]:" % serve_path) or serve_path
+            serve_path = expanduser(serve_path)
+            if not exists(serve_path):
+                choice = raw_input("%s does not exist. Should it be created? [y]/n: " % serve_path) or 'y'
+                if choice not in ['y', 'n']:
+                    print("please enter 'y' or 'n'.")
+                elif choice == 'y':
+                    makedirs(serve_path)
+                    input_valid = True
+            else:
                 input_valid = True
-          else:
-            input_valid = True
 
         protopath = join(prefix, 'share/rst0.17/proto')
         input_valid = False if not args.generate else True
@@ -76,10 +77,10 @@ def main_entry(args=None):
                 choice = raw_input("%s does not exist! "
                                    "Do you want to ommit RST in your configuration? [y]/n:" % protopath) or 'y'
                 if choice not in ['y', 'n']:
-                  print("please enter 'y' or 'n'.")
+                    print("please enter 'y' or 'n'.")
                 if choice =='y':
-                  input_valid = True
-                  protopath = None
+                    input_valid = True
+                    protopath = None
             else:
                 input_valid = True
 
@@ -122,7 +123,7 @@ def main_entry(args=None):
     if args.generate:
         return
 
-    t1 = threading.Thread(target=run_crossbar, args=(config_path,args.keep_alive,))
+    t1 = threading.Thread(target=run_crossbar, args=(config_path, args.keep_alive,))
     t1.setDaemon(True)
     t1.start()
     while not check_server('localhost', 8181):
@@ -149,12 +150,13 @@ def check_server(address, port):
     s = socket.socket()
     try:
         s.connect((address, port))
-        #print "Connected to %s on port %s" % (address, port)
+        print "Connected to %s on port %s" % (address, port)
         s.close()
         return True
     except socket.error, e:
-        #print "Connection to %s on port %s failed: %s" % (address, port, e)
+        print "Connection to %s on port %s failed: %s" % (address, port, e)
         return False
+
 
 CONFIG_JSON = """
 {
