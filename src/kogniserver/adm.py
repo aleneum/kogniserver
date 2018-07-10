@@ -46,8 +46,8 @@ def main_entry(args=None):
     if exists(config_path) is False:
         input_valid = False if not args.generate else True
         while not input_valid:
-            choice = raw_input("config.json for crossbar does not exists. "
-                               "Should a default one be created? [y]/n:") or 'y'
+            choice = raw_input("config.json for crossbar does not exists. Should a default one be created "
+                               "at %s? [y]/n:" % config_path) or 'y'
             if choice not in ['y', 'n']:
                 print("please enter 'y' or 'n'.")
             else:
@@ -150,11 +150,11 @@ def check_server(address, port):
     s = socket.socket()
     try:
         s.connect((address, port))
-        print "Connected to %s on port %s" % (address, port)
+        # print "Connected to %s on port %s" % (address, port)
         s.close()
         return True
     except socket.error, e:
-        print "Connection to %s on port %s failed: %s" % (address, port, e)
+        # print "Connection to %s on port %s failed: %s" % (address, port, e)
         return False
 
 
