@@ -6,7 +6,7 @@ import json
 
 setup(
     name='kogniserver',
-    version='0.2.4',
+    version='0.2.5',
     maintainer='Alexander Neumann',
     maintainer_email='aleneum@gmail.com',
     url='http://github.com/aleneum/kogniserver',
@@ -18,9 +18,7 @@ setup(
     zip_safe=False,
     tests_require=['nose>=1.3', 'coverage'],
     # pyasn and following are some requirements of autobahn
-    install_requires=['crossbar >=16, <17', 'autobahn >=0.16, <0.17',
-                      'trollius', 'rsb-python', 'pyasn1 <0.5.0, >=0.4.1',
-                      'idna <2.7, >=2.5', 'numpy','scipy'],
+    install_requires=['six', 'crossbar <=18.4.1', 'trollius', 'rsb-python', 'Twisted>=17.5.0', 'attrs>=17.4.0'],
     entry_points={
         "console_scripts": [
             "kogniserver = kogniserver.adm:main_entry",

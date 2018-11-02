@@ -16,3 +16,4 @@ node.key
 *.key
 
 tests/config.test.json
+.vscode/settings.json

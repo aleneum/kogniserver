@@ -1,6 +1,6 @@
 six
-autobahn<0.17
-crossbar<17.0
+crossbar<=18.4.1
+Twisted>=17.5.0
+attrs>=17.4.0
 rsb-python
 trollius
-

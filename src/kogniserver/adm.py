@@ -12,12 +12,12 @@ import sys
 
 def run_crossbar(config_path, keep_alive):
     ret = subprocess.call(['crossbar', 'status'])
-
     if ret == 0 and not keep_alive:
         subprocess.call(['crossbar', 'stop'])
 
     if ret != 0 or not keep_alive:
-        subprocess.call(['crossbar', 'start', '--config=%s' % config_path])
+        cmd = ['crossbar', 'start', '--config=%s' % config_path]
+        subprocess.call(cmd)
 
 
 def main_entry(args=None):

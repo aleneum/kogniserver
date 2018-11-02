@@ -23,7 +23,7 @@ class Ping(Thread):
         try:
             while self.running:
                 logging.debug("ping")
-                self.wamp.publish("com.wamp.ping", "ping")
+                self.wamp.publish(u'com.wamp.ping', "ping")
                 time.sleep(1)
         except Exception as e:
             logging.debug(e)
@@ -47,11 +47,11 @@ class Component(ApplicationSession):
         self.session = SessionHandler(self, log_level)
 
         # register RPC
-        reg = yield self.register(self.session.register_scope, 'service.displayserver.register')
-        rpc = yield self.register(self.session.call_rpc, 'service.displayserver.call')
+        reg = yield self.register(self.session.register_scope, u'service.displayserver.register')
+        rpc = yield self.register(self.session.call_rpc, u'service.displayserver.call')
 
         # setup ping
-        sub = yield self.subscribe(self.on_ping, "com.wamp.ping")
+        sub = yield self.subscribe(self.on_ping, u'com.wamp.ping')
 
         self.ping = Ping(self)
         self.ping.start()
