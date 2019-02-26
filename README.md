@@ -71,4 +71,8 @@ If you use the standard configuration, files will be hosted under `/install/path
 
 ### What now?
 
-If you plan to write applications in javascript, head over to the [KogniJS-Framework](http://github.com/aleneum/kognijs-rsb).
+If you plan to write applications in javascript, head over to the [KogniJS-Framework](http://github.com/kognihome/kognijs).
+
+## Acknowledgements
+
+The development of this software was supported through project grants [KogniHome](kogni-home.de) (German Federal Ministry of Education and Research (BMBF) grant no. 16SV7054K) at Bielefeld University.

@@ -6,10 +6,9 @@ import json
 
 setup(
     name='kogniserver',
-    version='0.2.5',
+    version='0.3.0',
     maintainer='Alexander Neumann',
-    maintainer_email='aleneum@gmail.com',
-    url='http://github.com/aleneum/kogniserver',
+    url='http://github.com/kognihome/kogniserver',
     description="Interface server of the KogniHome project",
     platforms=['Any'],
     packages=find_packages('src'),
