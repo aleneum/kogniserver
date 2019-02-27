@@ -1,15 +1,22 @@
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 import os
+import codecs
 from os.path import join, exists, abspath
 import json
 
+with codecs.open('README.md', 'r', 'utf-8') as f:
+    # cut the badges from the description and also the TOC which is currently not working on PyPi
+    long_description = ''.join(f.readlines()[2:])
+
 setup(
     name='kogniserver',
-    version='0.3.0',
+    version='0.3.1',
     maintainer='Alexander Neumann',
     url='http://github.com/kognihome/kogniserver',
     description="Interface server of the KogniHome project",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     platforms=['Any'],
     packages=find_packages('src'),
     package_dir={'': 'src'},
