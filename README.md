@@ -1,4 +1,4 @@
-# KogniServer [![Build Status](https://travis-ci.org/aleneum/kogniserver.svg?branch=master)](https://travis-ci.org/aleneum/kogniserver) [![Coverage Status](https://coveralls.io/repos/github/aleneum/kogniserver/badge.svg?branch=master)](https://coveralls.io/github/aleneum/kogniserver?branch=master)
+# KogniServer [![Build Status](https://travis-ci.org/aleneum/kogniserver.svg?branch=master)](https://travis-ci.org/aleneum/kogniserver) [![Coverage Status](https://coveralls.io/repos/github/aleneum/kogniserver/badge.svg?branch=master)](https://coveralls.io/github/aleneum/kogniserver?branch=master) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2578022.svg)](https://doi.org/10.5281/zenodo.2578022)
 
 A web server and bridge between networks using the Web Application Message Protocol ([WAMP](http://wamp-proto.org/)) and the Robotic Service Bus ([RSB](https://code.cor-lab.org/projects/rsb)) build upon [crossbar](http://crossbar.io/).
 WAMP is provided by [autobahn](http://autobahn.ws/). This software is actively developed as part of the project [KogniHome](http://www.kognihome.de).
